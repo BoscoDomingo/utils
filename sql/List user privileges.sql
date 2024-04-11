@@ -18,7 +18,8 @@ SELECT
     WHEN 'm' THEN 'materialized view'
     WHEN 'S' THEN 'sequence'
     WHEN 'f' THEN 'foreign table'
-  END as "Type"
+  END as "Type",
+  c.relname as "Name"
 FROM pg_catalog.pg_class c
 LEFT JOIN pg_catalog.pg_namespace n ON n.oid = c.relnamespace
 WHERE pg_catalog.array_to_string(c.relacl, E'\n') LIKE '%username%';
