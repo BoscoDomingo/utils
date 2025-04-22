@@ -1,0 +1,47 @@
+const numBuckets = 5;
+const totalCount = db.coll.countDocuments();
+
+db.coll.aggregate([
+  { $sort: { _id: 1 } },
+  {
+    $setWindowFields: {
+      sortBy: { _id: 1 },
+      output: {
+        rowNum: { $documentNumber: {} }
+      }
+    }
+  },
+  {
+    $addFields: {
+      bucket: {
+        $floor: {
+          $divide: [
+            { $multiply: [{ $subtract: ["$rowNum", 1] }, numBuckets] },
+            totalCount
+          ]
+        }
+      }
+    }
+  },
+  {
+    $group: {
+      _id: "$bucket",
+      min_id: { $first: "$_id" },
+      max_id: { $last: "$_id" },
+      count: { $sum: 1 },
+    }
+  },
+  { $sort: { _id: 1 } }
+]);
+
+// Groups documents into buckets based on their _id field
+// Correctly works even when the number of documents is not evenly divisible by the number of buckets
+// The return allows 0 overlap between buckets, and assumes the min id and max id are used by
+// inclusive queries later on
+
+// Example: { _id: 1 }, { _id: 2 }, { _id: 3 }, { _id: 4 }, { _id: 5 }, { _id: 6 }, { _id: 7 }, { _id: 8 }, { _id: 9 }, { _id: 10 }
+// numBuckets = 3
+// returns:
+// { _id: 0, min_id: 1, max_id: 3, count: 3 }
+// { _id: 1, min_id: 4, max_id: 7, count: 3 }
+// { _id: 2, min_id: 8, max_id: 10, count: 2 }
