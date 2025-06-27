@@ -1,0 +1,17 @@
+meta {
+  name: Chat completion
+  type: http
+  seq: 2
+}
+
+post {
+  url: https://api.openai.com/v1/chat/completions
+  body: none
+  auth: inherit
+}
+
+headers {
+  Authorization: Bearer $OPENAI_API_KEY
+  OpenAI-Organization: org-RPwYxRofVymFySN80AxhjZkN
+  OpenAI-Project: proj_eADIxiax6blfWQp2L57CiMO7
+}

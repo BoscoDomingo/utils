@@ -1,0 +1,15 @@
+meta {
+  name: List available models
+  type: http
+  seq: 1
+}
+
+get {
+  url: https://api.openai.com/v1/models
+  body: none
+  auth: bearer
+}
+
+auth:bearer {
+  token: {{OPEN_AI_API_KEY}}
+}
