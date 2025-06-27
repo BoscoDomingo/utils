@@ -1,0 +1,19 @@
+# Environment variables
+.env
+
+# Data directory with webhook payloads
+data/
+
+# Binaries
+bin/
+
+# Go build artifacts
+*.exe
+*.exe~
+*.dll
+*.so
+*.dylib
+*.test
+*.out
+go.work
+go.work.sum
