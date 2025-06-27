@@ -1,0 +1,14 @@
+type: workspace
+model: workspace
+id: wk_ZmhNaPNifi
+createdAt: 2025-06-25T17:50:05.391756196
+updatedAt: 2025-06-25T17:50:05.391756758
+authentication: {}
+authenticationType: null
+description: ''
+headers: []
+name: Yaak
+encryptionKeyChallenge: null
+settingValidateCertificates: true
+settingFollowRedirects: true
+settingRequestTimeout: 0
