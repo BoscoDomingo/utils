@@ -1,0 +1,256 @@
+{
+	"$schema": "https://biomejs.dev/schemas/2.0.4/schema.json",
+	"assist": { "actions": { "source": { "organizeImports": "on", "useSortedKeys": "on" } } },
+	"files": {
+		"includes": [
+			"src/**/*",
+			"test/**/*",
+			"tests/**/*",
+			"!**/node_modules/**/*",
+			"!**/dist/**/*",
+			"!**/lib/**/*",
+			"!**/build/**/*",
+			"!**/out/**/*",
+			"!**/.github/**/*",
+			"!**/requests/**/*",
+			"!**/*.toml",
+			"!**/*.bru",
+			"!**/*.example",
+			"!**/.nvmrc",
+			"!**/*.md",
+			"!**/*.yaml",
+			"!**/*.yml",
+			"!**/*.dockerignore",
+			"!**/*.Dockerfile",
+			"!**/Dockerfile"
+		]
+	},
+	"formatter": {
+		"enabled": true,
+		"formatWithErrors": false,
+		"indentStyle": "tab",
+		"indentWidth": 2,
+		"lineEnding": "lf",
+		"lineWidth": 120
+	},
+	"javascript": {
+		"formatter": {
+			"arrowParentheses": "asNeeded",
+			"bracketSameLine": false,
+			"bracketSpacing": true,
+			"semicolons": "always",
+			"trailingCommas": "all"
+		},
+		"globals": ["_", "describe", "it", "expect", "beforeEach", "afterEach", "beforeAll", "afterAll"],
+		"parser": {
+			"unsafeParameterDecoratorsEnabled": true
+		}
+	},
+	"json": {
+		"formatter": {
+			"enabled": true,
+			"expand": "auto",
+			"trailingCommas": "none"
+		},
+		"parser": {
+			"allowComments": true,
+			"allowTrailingCommas": true
+		}
+	},
+	"linter": {
+		"enabled": true,
+		"rules": {
+			"complexity": {
+				"noForEach": "error",
+				"noStaticOnlyClass": "off",
+				"noUselessContinue": "warn",
+				"noUselessStringConcat": "error",
+				"noUselessUndefinedInitialization": "warn",
+				"useDateNow": "warn",
+				"useLiteralKeys": "warn",
+				"useSimplifiedLogicExpression": "warn"
+			},
+			"correctness": {
+				"noConstantMathMinMaxClamp": "warn",
+				"noUndeclaredDependencies": "warn",
+				"noUndeclaredVariables": "error",
+				"noUnusedFunctionParameters": "warn",
+				"noUnusedImports": "warn",
+				"noUnusedPrivateClassMembers": "warn",
+				"noUnusedVariables": "warn"
+			},
+			"performance": {
+				"noAccumulatingSpread": "error",
+				"noBarrelFile": "warn",
+				"noReExportAll": "error",
+				"useTopLevelRegex": "warn"
+			},
+			"recommended": true,
+			"style": {
+				"noInferrableTypes": "error",
+				"noNegationElse": "error",
+				"noNestedTernary": "info",
+				"noNonNullAssertion": "warn",
+				"noParameterAssign": "error",
+				"noSubstr": "error",
+				"noUnusedTemplateLiteral": "error",
+				"noUselessElse": "error",
+				"noYodaExpression": "warn",
+				"useArrayLiterals": "info",
+				"useAsConstAssertion": "error",
+				"useAtIndex": "error",
+				"useBlockStatements": "warn",
+				"useCollapsedElseIf": "error",
+				"useCollapsedIf": "error",
+				"useConsistentArrayType": "warn",
+				"useConsistentBuiltinInstantiation": "warn",
+				"useConsistentMemberAccessibility": { "level": "warn", "options": { "accessibility": "noPublic" } },
+				"useDefaultParameterLast": "error",
+				"useEnumInitializers": "error",
+				"useForOf": "warn",
+				"useImportType": "info",
+				"useLiteralEnumMembers": "error",
+				"useNamingConvention": {
+					"level": "error",
+					"options": {
+						"conventions": [
+							{
+								"formats": ["camelCase"],
+								"match": "_{0,1}((.*))",
+								"selector": {
+									"kind": "functionParameter"
+								}
+							},
+							{
+								"match": "[ijxy]|(.*)",
+								"selector": {
+									"kind": "variable"
+								}
+							},
+							{
+								"formats": ["camelCase", "snake_case", "CONSTANT_CASE"],
+								"match": "[_\\$]{0,1}(.+)",
+								"selector": {
+									"kind": "objectLiteralProperty"
+								}
+							},
+							{
+								"formats": ["camelCase", "snake_case"],
+								"match": "[_\\$]{0,1}(.+)",
+								"selector": {
+									"kind": "typeMember"
+								}
+							},
+							{
+								"formats": ["camelCase"],
+								"match": "(e|(.{2,}))",
+								"selector": {
+									"kind": "catchParameter"
+								}
+							},
+							{
+								"formats": ["camelCase"],
+								"selector": {
+									"kind": "classMethod",
+									"modifiers": ["private"]
+								}
+							},
+							{
+								"match": "_(.+)",
+								"selector": {
+									"kind": "classMember",
+									"modifiers": ["private"]
+								}
+							},
+							{
+								"match": "(.{2,})"
+							},
+							{
+								"formats": ["PascalCase"],
+								"match": "(.{2,}s)",
+								"selector": {
+									"kind": "enum"
+								}
+							},
+							{
+								"formats": ["CONSTANT_CASE", "PascalCase"],
+								"selector": {
+									"kind": "enumMember"
+								}
+							},
+							{
+								"formats": ["CONSTANT_CASE", "camelCase"],
+								"selector": {
+									"kind": "classProperty",
+									"modifiers": ["private", "readonly"]
+								}
+							},
+							{
+								"formats": ["CONSTANT_CASE"],
+								"selector": {
+									"kind": "classProperty",
+									"modifiers": ["static", "readonly"]
+								}
+							},
+							{
+								"formats": ["CONSTANT_CASE", "PascalCase", "camelCase"],
+								"match": "__(.+)__|_(.+)|(.+)",
+								"selector": {
+									"kind": "const",
+									"scope": "global"
+								}
+							}
+						],
+						"requireAscii": true,
+						"strictCase": false
+					}
+				},
+				"useNodeAssertStrict": "warn",
+				"useNumberNamespace": "error",
+				"useSelfClosingElements": "error",
+				"useShorthandAssign": "warn",
+				"useSingleVarDeclarator": "info",
+				"useThrowNewError": "warn",
+				"useThrowOnlyError": "error",
+				"useTrimStartEnd": "error"
+			},
+			"suspicious": {
+				"noApproximativeNumericConstant": "error",
+				"noArrayIndexKey": "error",
+				"noAssignInExpressions": "error",
+				"noAsyncPromiseExecutor": "error",
+				"noCatchAssign": "error",
+				"noClassAssign": "error",
+				"noCommentText": "error",
+				"noCompareNegZero": "error",
+				"noConfusingVoidType": "warn",
+				"noConsole": "warn",
+				"noEmptyBlock": "warn",
+				"noEmptyBlockStatements": "error",
+				"noExplicitAny": "warn",
+				"noMisplacedAssertion": "off",
+				"useAwait": "error",
+				"useErrorMessage": "warn",
+				"useNumberToFixedDigitsArgument": "warn"
+			}
+		}
+	},
+	"overrides": [
+		{
+			"includes": ["src/**/*.service.ts", "src/**/*.controller.ts"],
+			"linter": {
+				"rules": {
+					"style": {
+						"useImportType": "off"
+					}
+				}
+			}
+		}
+	],
+	"vcs": {
+		"clientKind": "git",
+		"enabled": true,
+		"root": "./",
+		"useIgnoreFile": true
+	}
+}
