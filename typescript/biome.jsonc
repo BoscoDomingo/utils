@@ -1,0 +1,274 @@
+{
+	"$schema": "https://biomejs.dev/schemas/2.1.0/schema.json",
+	"assist": { "actions": { "source": { "organizeImports": "on" } } },
+	"files": {
+		"includes": [
+			"**/src/**/*",
+			"**/test/**/*",
+			"**/tests/**/*",
+			"!**/node_modules/**/*",
+			"!**/dist/**/*",
+			"!**/lib/**/*",
+			"!**/build/**/*",
+			"!**/out/**/*",
+			"!**/.github/**/*",
+			"!**/requests/**/*",
+			"!**/*.toml",
+			"!**/*.bru",
+			"!**/*.example",
+			"!**/.nvmrc",
+			"!**/*.md",
+			"!**/*.yaml",
+			"!**/*.yml",
+			"!**/*.dockerignore",
+			"!**/*.Dockerfile",
+			"!**/Dockerfile"
+		]
+	},
+	"formatter": {
+		"enabled": true,
+		"formatWithErrors": false,
+		"indentStyle": "tab",
+		"indentWidth": 2,
+		"lineEnding": "lf",
+		"lineWidth": 120
+	},
+	"linter": {
+		"enabled": true,
+		"rules": {
+			"recommended": true,
+			"complexity": {
+				"noForEach": "error",
+				"noStaticOnlyClass": "off",
+				"noUselessContinue": "warn",
+				"noUselessStringConcat": "error",
+				"noUselessUndefinedInitialization": "warn",
+				"useDateNow": "warn",
+				"useLiteralKeys": "warn",
+				"useSimplifiedLogicExpression": "warn"
+			},
+			"nursery": {
+				"useReadonlyClassProperties": {
+					"level": "warn",
+					"options": {
+						"checkAllProperties": false
+					}
+				}
+			},
+			"style": {
+				"noCommonJs": "error",
+				"noInferrableTypes": "error",
+				"noNegationElse": "error",
+				"noNestedTernary": "info",
+				"noNonNullAssertion": "warn",
+				"noParameterAssign": "error",
+				"noSubstr": "error",
+				"noUnusedTemplateLiteral": "error",
+				"noUselessElse": "error",
+				"noYodaExpression": "warn",
+				"useArrayLiterals": "info",
+				"useAsConstAssertion": "error",
+				"useAtIndex": "error",
+				"useBlockStatements": "warn",
+				"useCollapsedElseIf": "error",
+				"useCollapsedIf": "error",
+				"useConsistentArrayType": "warn",
+				"useConsistentBuiltinInstantiation": "warn",
+				"useConsistentMemberAccessibility": { "level": "warn", "options": { "accessibility": "noPublic" } },
+				"useDefaultParameterLast": "error",
+				"useEnumInitializers": "error",
+				"useForOf": "warn",
+				"useImportType": "info",
+				"useLiteralEnumMembers": "error",
+				"useNamingConvention": {
+					"level": "error",
+					"options": {
+						"strictCase": false,
+						"requireAscii": true,
+						// Source: https://biomejs.dev/linter/rules/use-naming-convention/#conventions
+						"conventions": [
+							// Place stricter rules above looser rules if they both target the same element
+							{
+								"selector": {
+									"kind": "variable"
+								},
+								"match": "[ijxy]|(.*)"
+								// Formats omitted on purpose to fall through to the next rule
+							},
+							{
+								"match": "(.{2,})"
+							},
+							{
+								"selector": {
+									"kind": "functionParameter"
+								},
+								"formats": ["camelCase"],
+								"match": "_{0,1}((.*))"
+							},
+							{
+								"selector": {
+									"kind": "objectLiteralProperty"
+								},
+								"formats": ["camelCase", "snake_case"],
+								"match": "[_\\$]{0,1}(.+)"
+							},
+							{
+								"selector": {
+									"kind": "typeParameter"
+								},
+								"formats": ["PascalCase"]
+							},
+							{
+								"selector": {
+									"kind": "typeMember"
+								},
+								"formats": ["camelCase", "snake_case"],
+								"match": "[_\\$]{0,1}(.+)"
+							},
+							{
+								"selector": {
+									"kind": "catchParameter"
+								},
+								"match": "e|(.{2,})",
+								"formats": ["camelCase"]
+							},
+							// All methods should have at least 3 characters. and private methods should not be prefixed with underscore
+							{
+								"selector": {
+									"kind": "classMethod"
+								},
+								"formats": ["camelCase"],
+								"match": "(.{3,})"
+							},
+							{
+								"selector": {
+									"kind": "classProperty",
+									"modifiers": ["private", "readonly"]
+								},
+								"formats": ["CONSTANT_CASE", "camelCase"],
+								"match": "_(.+)"
+							},
+							{
+								"selector": {
+									"kind": "classProperty",
+									"modifiers": ["private"]
+								},
+								"formats": ["camelCase"],
+								"match": "_(.+)"
+							},
+							{
+								"selector": {
+									"kind": "classProperty",
+									"modifiers": ["static", "readonly"]
+								},
+								"formats": ["CONSTANT_CASE"]
+							},
+							// Private members (except methods) should be prefixed with underscore
+							{
+								"selector": {
+									"kind": "classMember",
+									"modifiers": ["private"]
+								},
+								"match": "_(.+)"
+								// Formats omitted on purpose to fall through
+							},
+							{
+								"selector": {
+									"kind": "enum"
+								},
+								"formats": ["PascalCase"],
+								"match": "(.{2,}s)"
+							},
+							{
+								"selector": {
+									"kind": "enumMember"
+								},
+								"formats": ["CONSTANT_CASE", "PascalCase"]
+							},
+							{
+								"selector": {
+									"kind": "const",
+									"scope": "global"
+								},
+								"match": "__(.+)__|_(.+)|(.+)",
+								"formats": ["CONSTANT_CASE", "PascalCase", "camelCase"]
+							}
+						]
+					}
+				},
+				"useNodeAssertStrict": "warn",
+				"useNumberNamespace": "error",
+				"useSelfClosingElements": "error",
+				"useShorthandAssign": "warn",
+				"useSingleVarDeclarator": "info",
+				"useThrowNewError": "warn",
+				"useThrowOnlyError": "error",
+				"useTrimStartEnd": "error"
+			},
+			"suspicious": {
+				"noExplicitAny": "warn",
+				"noConfusingVoidType": "warn",
+				"noEmptyBlock": "warn",
+				"noMisplacedAssertion": "off",
+				"useAwait": "error",
+				"useErrorMessage": "error",
+				"useNumberToFixedDigitsArgument": "warn"
+			},
+			"correctness": {
+				"noUnusedFunctionParameters": "warn",
+				"noUnusedImports": "warn",
+				"noUnusedVariables": "warn",
+				"noUnusedPrivateClassMembers": "warn",
+				"noConstantMathMinMaxClamp": "warn",
+				"noUndeclaredDependencies": "warn",
+				"noUndeclaredVariables": "error"
+			},
+			"performance": {
+				"noBarrelFile": "warn",
+				"noReExportAll": "error",
+				"noDelete": "warn"
+			}
+		}
+	},
+	"overrides": [
+		{
+			"includes": ["**/src/**/*.service.ts", "**/src/**/*.controller.ts"],
+			"linter": {
+				"rules": {
+					"style": {
+						"useImportType": "off"
+					}
+				}
+			}
+		}
+	],
+	"javascript": {
+		"formatter": {
+			"arrowParentheses": "asNeeded",
+			"bracketSameLine": false,
+			"bracketSpacing": true,
+			"semicolons": "always",
+			"trailingCommas": "all"
+		},
+		"globals": ["_", "describe", "it", "expect", "beforeEach", "afterEach", "beforeAll", "afterAll"],
+		"parser": {
+			"unsafeParameterDecoratorsEnabled": true
+		}
+	},
+	"json": {
+		"formatter": {
+			"enabled": true,
+			"trailingCommas": "none"
+		},
+		"parser": {
+			"allowComments": true,
+			"allowTrailingCommas": true
+		}
+	},
+	"vcs": {
+		"enabled": true,
+		"useIgnoreFile": true,
+		"clientKind": "git",
+		"root": "./"
+	}
+}
