@@ -14,7 +14,6 @@
 			"!**/.github/**/*",
 			"!**/requests/**/*",
 			"!**/*.toml",
-			"!**/*.bru",
 			"!**/*.example",
 			"!**/.nvmrc",
 			"!**/*.md",
@@ -47,13 +46,76 @@
 				"useLiteralKeys": "warn",
 				"useSimplifiedLogicExpression": "warn"
 			},
+			// These are rules that are not yet stable and may change at any point.
+			// We'll use it as a way to keep track of interesting rules we may want to use in the future.
 			"nursery": {
+				"noAwaitInLoop": "off", //"warn",
+				"noConstantBinaryExpression": "off", //"info",
+				"noExcessiveLinesPerFunction": {
+					"level": "off", //"warn",
+					"options": {
+						"maxLines": 70,
+						"skipBlankLines": true,
+						"skipIifes": false
+					}
+				},
+				"noFloatingPromises": "off", //"error",
+				"noImportCycles": "off", //"error",
+				"noMagicNumbers": "off", //"info",
+				"noMisusedPromises": "off", //"error"
+				"noNoninteractiveElementInteractions": "off", //"error",
+				"noProcessGlobal": "off", //"info",
+				"noReactPropAssign": "off", //"warn",
+				"noRestrictedElements": {
+					"level": "off", //"error",
+					"options": {
+						"elements": {
+							"br": "Line breaks should not be used in HTML"
+						}
+					}
+				},
+				"noSecrets": "off", //"error",
+				"noShadow": "off", //"warn",
+				"noTsIgnore": "off", //"error",
+				"noUnassignedVariables": "off", //"warn",
+				"noUnwantedPolyfillio": "off", //"error",
+				"noUselessBackrefInRegex": "off", //"error",
+				"noUselessEscapeInString": "off", //"warn",
+				"noUselessUndefined": "off", //"info",
+				"useAdjacentGetterSetter": "off", //"warn",
+				"useConsistentObjectDefinition": {
+					"level": "off", //"warn",
+					"options": {
+						"syntax": "shorthand"
+					}
+				},
+				"useConsistentResponse": "off", //"warn",
+				"useExhaustiveSwitchCases": "off", //"warn",
+				"useExplicitType": "off", //"warn",
+				"useExportsLast": "off", //"warn",
+				"useGoogleFontPreconnect": "off", //"warn",
+				"useIndexOf": "off", //"warn",
+				"useIterableCallbackReturn": "off", //"warn",
+				"useJsonImportAttribute": "off", //"error",
+				"useNumericSeparators": "off", //"info",
+				"useObjectSpread": "off", //"warn",
+				"useParseIntRadix": "off", //"error",
 				"useReadonlyClassProperties": {
-					"level": "warn",
+					"level": "off", //"warn",
 					"options": {
 						"checkAllProperties": false
 					}
-				}
+				},
+				"useSingleJsDocAsterisk": "off", //"info",
+				"useSortedClasses": {
+					"level": "off", //"warn",
+					"options": {
+						"attributes": ["classList"],
+						"functions": []
+					}
+				},
+				"useUnifiedTypeSignature": "off", //"warn",
+				"useUniqueElementIds": "off" //"warn",
 			},
 			"style": {
 				"noCommonJs": "error",
@@ -209,6 +271,7 @@
 				"noExplicitAny": "warn",
 				"noConfusingVoidType": "warn",
 				"noEmptyBlock": "warn",
+				"noGlobalIsNan": "error",
 				"noMisplacedAssertion": "off",
 				"useAwait": "error",
 				"useErrorMessage": "error",
