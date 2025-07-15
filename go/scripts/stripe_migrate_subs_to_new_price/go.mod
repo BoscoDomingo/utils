@@ -1,4 +1,4 @@
-module github.com/BoscoDomingo/utils/go/scripts/migrate_stripe_subs_to_new_price
+module github.com/BoscoDomingo/utils/go/scripts/stripe_migrate_subs_to_new_price
 
 go 1.24.4
 
