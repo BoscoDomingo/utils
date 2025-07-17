@@ -1,4 +1,4 @@
-package main
+package internal
 
 type SubscriptionUpdateParams struct {
 	SubscriptionID string

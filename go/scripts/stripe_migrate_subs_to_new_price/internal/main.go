@@ -1,4 +1,4 @@
-package main
+package internal
 
 import (
 	"context"
@@ -7,6 +7,7 @@ import (
 
 	"sync"
 
+	"github.com/BoscoDomingo/utils/go/scripts/stripe_migrate_subs_to_new_price/data"
 	"github.com/stripe/stripe-go/v82"
 	"github.com/stripe/stripe-go/v82/subscription"
 	"golang.org/x/sync/errgroup"
@@ -16,38 +17,41 @@ const (
 	numWorkers = 10 // Number of concurrent workers to update subscriptions
 )
 
-// priceMapping maps the old price IDs to the new price IDs
-var priceMapping = map[string]string{
-	// Fill with your data
-}
-
-// This script will migrate all active subscriptions in Stripe from old prices to new prices using goroutines for performance.
-// It first fetches all subscriptions that need to be migrated per price mapping,
-// and then updates them, each operation performing its tasks in parallel.
+// Migrate all active subscriptions in Stripe from old prices to new prices using goroutines for performance.
+// If necessary, it fetches the price IDs by the lookup keys.
+// It then fetches all subscriptions that need to be migrated per price mapping
+// and updates them, each operation performing its tasks in parallel.
 // (i.e. all subscriptions are fetched in parallel, then all updates are performed in parallel).
 //
 // The script is thread-safe.
-// Waitgroups are used for the fetching, and semaphores and channels are used for the updates.
-func main() {
+func Migrate() {
 	stripe.Key = os.Getenv("STRIPE_API_KEY")
 	if stripe.Key == "" {
 		log.Fatal("STRIPE_API_KEY environment variable is required")
 	}
 
-	log.Printf("Starting migration for %d price mappings", len(priceMapping))
+	if len(data.LookupKeyMapping) != 0 {
+		log.Printf("Fetching price IDs from lookup keys")
+		getPriceIDsFromLookupKeys(data.LookupKeyMapping, data.PriceIDMapping)
+	}
 
-	subscriptionsToMigrate := make(map[string]SubscriptionUpdateParams) // The entire list of subscriptions to migrate across all price mappings
+	log.Printf("Starting migration for %d price mappings", len(data.PriceIDMapping))
+
+	// The entire list of subscriptions to migrate across all price mappings.
+	// It's a map to allow for concurrent updates without overlapping or requiring a lock.
+	subscriptionsToMigrate := make(map[string]SubscriptionUpdateParams)
+	// The stats per Price ID mapping
 	priceStats := make(map[string]*PriceMigrationStats)
 
 	var fetchWaitGroup sync.WaitGroup
-	for oldPriceID, newPriceID := range priceMapping {
+	for oldPriceID, newPriceID := range data.PriceIDMapping {
 		priceStats[oldPriceID] = &PriceMigrationStats{
 			OldPriceID:    oldPriceID,
 			NewPriceID:    newPriceID,
 			FailedSubsIDs: make([]string, 0),
 		}
 		fetchWaitGroup.Add(1)
-		go fetchSubscriptionsToMigrate(oldPriceID, newPriceID, priceStats, subscriptionsToMigrate, &fetchWaitGroup)
+		go getSubscriptionsToMigrate(oldPriceID, newPriceID, priceStats, subscriptionsToMigrate, &fetchWaitGroup)
 	}
 
 	fetchWaitGroup.Wait()
@@ -87,7 +91,7 @@ func main() {
 	}()
 
 	// Update prices in parallel, leveraging errgroup to handle errors
-	// and limiting the number of concurrent goroutines to numWorkers.
+	// and limiting the number of concurrent goroutines.
 	errorGroup, ctx := errgroup.WithContext(context.Background())
 	semaphore := make(chan struct{}, numWorkers)
 
@@ -166,50 +170,11 @@ func main() {
 	log.Printf("Total subscriptions processed: %d", totalProcessed)
 	log.Printf("Successful migrations: %d (%.2f%%)", totalSuccess, float64(totalSuccess)/float64(totalProcessed)*100)
 	log.Printf("Failed migrations: %d (%.2f%%)", totalFailure, float64(totalFailure)/float64(totalProcessed)*100)
-	log.Printf("Price mappings processed: %d", len(priceMapping))
+	log.Printf("Price mappings processed: %d", len(data.PriceIDMapping))
 
 	if totalFailure > 0 {
 		log.Printf("\nReview the failed subscriptions above for manual intervention.")
 	} else {
 		log.Printf("🎉 All subscriptions migrated successfully!")
 	}
-}
-
-// fetchSubscriptionsToMigrate fetches all active subscriptions that use a specific price ID (`oldPriceID`)
-// and adds them to the `subscriptionsToMigrate` map.
-//
-// It also updates the `priceStats` for the `oldPriceID`.
-//
-// It assumes that each subscription has only one item, or that the last one is the one we want to migrate.
-func fetchSubscriptionsToMigrate(oldPriceID, newPriceID string, priceStats map[string]*PriceMigrationStats, subscriptionsToMigrate map[string]SubscriptionUpdateParams, wg *sync.WaitGroup) {
-	defer wg.Done()
-
-	log.Printf("Fetching subscriptions for price %s -> %s", oldPriceID, newPriceID)
-
-	iter := subscription.List(&stripe.SubscriptionListParams{
-		Status: stripe.String("active"),
-		Price:  stripe.String(oldPriceID),
-	})
-
-	count := 0
-	for iter.Next() {
-		s := iter.Subscription()
-		// NOTE: We assume that each subscription has only one item, or that the last one is the one we want to migrate
-		item := s.Items.Data[len(s.Items.Data)-1]
-
-		subscriptionsToMigrate[s.ID] = SubscriptionUpdateParams{
-			SubscriptionID: s.ID,
-			ItemID:         item.ID,
-			OldPriceID:     oldPriceID,
-			NewPriceID:     newPriceID,
-		}
-		count++
-	}
-
-	if err := iter.Err(); err != nil {
-		log.Fatalf("list error for price %s: %v", oldPriceID, err)
-	}
-
-	priceStats[oldPriceID].TotalCount = count
-	log.Printf("Found %d subscriptions for price %s", count, oldPriceID)
 }

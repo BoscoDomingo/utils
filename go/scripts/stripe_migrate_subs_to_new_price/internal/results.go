@@ -1,4 +1,4 @@
-package main
+package internal
 
 // MigrationResult represents the result of a single subscription migration
 type MigrationResult struct {
