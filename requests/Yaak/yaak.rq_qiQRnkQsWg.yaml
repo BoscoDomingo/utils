@@ -1,0 +1,26 @@
+type: http_request
+model: http_request
+id: rq_qiQRnkQsWg
+createdAt: 2025-07-16T15:58:27.688120100
+updatedAt: 2025-07-16T16:17:32.585823500
+workspaceId: wk_ZmhNaPNifi
+folderId: fl_M5hQdeT4bt
+authentication: {}
+authenticationType: null
+body: {}
+bodyType: null
+description: ''
+headers: []
+method: GET
+name: Get all Prices
+sortPriority: -1752681507687.0
+url: ${[ BASE_URL ]}/v1/prices
+urlParameters:
+- enabled: true
+  name: limit
+  value: '50'
+  id: jB9QvW67pS
+- enabled: true
+  name: ''
+  value: ''
+  id: BDADDePgX5

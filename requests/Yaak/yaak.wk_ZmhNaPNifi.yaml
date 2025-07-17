@@ -2,13 +2,13 @@ type: workspace
 model: workspace
 id: wk_ZmhNaPNifi
 createdAt: 2025-06-25T17:50:05.391756196
-updatedAt: 2025-06-25T17:50:05.391756758
+updatedAt: 2025-07-16T16:14:44.940306600
 authentication: {}
 authenticationType: null
 description: ''
 headers: []
 name: Yaak
-encryptionKeyChallenge: null
+encryptionKeyChallenge: eUE0azNuQwGdkaQEjYRM5HjBxogIshP5Tq5PtDATMfjHPEn8bQpexSVz0E/OoJIO9BbCufJ1OsjDowOelHMa9wO89WsmQeldFrlcqjJGK7uwOOlnct/XJmjnFVklkD8JqBI=
 settingValidateCertificates: true
 settingFollowRedirects: true
 settingRequestTimeout: 0

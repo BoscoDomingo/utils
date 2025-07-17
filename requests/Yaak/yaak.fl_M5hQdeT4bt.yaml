@@ -1,0 +1,14 @@
+type: folder
+model: folder
+id: fl_M5hQdeT4bt
+createdAt: 2025-07-16T15:58:25.453246700
+updatedAt: 2025-07-16T16:16:15.000083
+workspaceId: wk_ZmhNaPNifi
+folderId: null
+authentication:
+  username: ${[ API_KEY ]}
+authenticationType: basic
+description: ''
+headers: []
+name: Stripe
+sortPriority: -1752681500000.0
