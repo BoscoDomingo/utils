@@ -2,7 +2,7 @@ type: http_request
 model: http_request
 id: rq_qiQRnkQsWg
 createdAt: 2025-07-16T15:58:27.688120100
-updatedAt: 2025-07-16T16:17:32.585823500
+updatedAt: 2025-07-23T13:17:59.132332800
 workspaceId: wk_ZmhNaPNifi
 folderId: fl_M5hQdeT4bt
 authentication: {}
@@ -21,6 +21,18 @@ urlParameters:
   value: '50'
   id: jB9QvW67pS
 - enabled: true
+  name: type
+  value: recurring
+  id: ED7vE3WIe3
+- enabled: false
+  name: recurring[interval]
+  value: month
+  id: Ma8KnPTBtY
+- enabled: false
+  name: recurring[meter]
+  value: '6'
+  id: Fu5iwDefF3
+- enabled: true
   name: ''
   value: ''
-  id: BDADDePgX5
+  id: 03bcF37Fzr
