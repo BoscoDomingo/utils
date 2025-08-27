@@ -1,18 +1,18 @@
 {
-	"$schema": "https://biomejs.dev/schemas/2.1.0/schema.json",
+	"$schema": "https://biomejs.dev/schemas/2.2.2/schema.json",
 	"assist": { "actions": { "source": { "organizeImports": "on" } } },
 	"files": {
 		"includes": [
 			"**/src/**/*",
 			"**/test/**/*",
 			"**/tests/**/*",
-			"!**/node_modules/**/*",
-			"!**/dist/**/*",
-			"!**/lib/**/*",
-			"!**/build/**/*",
-			"!**/out/**/*",
-			"!**/.github/**/*",
-			"!**/requests/**/*",
+			"!**/node_modules",
+			"!**/dist",
+			"!**/lib",
+			"!**/build",
+			"!**/out",
+			"!**/.github",
+			"!**/requests",
 			"!**/*.toml",
 			"!**/*.example",
 			"!**/.nvmrc",
@@ -37,89 +37,61 @@
 		"rules": {
 			"recommended": true,
 			"complexity": {
+				"noExcessiveLinesPerFunction": {
+					"level": "warn",
+					"options": {
+						"maxLines": 100,
+						"skipBlankLines": true,
+						"skipIifes": false
+					}
+				},
 				"noForEach": "error",
 				"noStaticOnlyClass": "off",
 				"noUselessContinue": "warn",
 				"noUselessStringConcat": "error",
 				"noUselessUndefinedInitialization": "warn",
 				"useDateNow": "warn",
+				"useIndexOf": "warn",
 				"useLiteralKeys": "warn",
 				"useSimplifiedLogicExpression": "warn"
 			},
-			// These are rules that are not yet stable and may change at any point.
-			// We'll use it as a way to keep track of interesting rules we may want to use in the future.
-			"nursery": {
-				"noAwaitInLoop": "off", //"warn",
-				"noConstantBinaryExpression": "off", //"info",
-				"noExcessiveLinesPerFunction": {
-					"level": "off", //"warn",
-					"options": {
-						"maxLines": 70,
-						"skipBlankLines": true,
-						"skipIifes": false
-					}
-				},
-				"noFloatingPromises": "off", //"error",
-				"noImportCycles": "off", //"error",
-				"noMagicNumbers": "off", //"info",
-				"noMisusedPromises": "off", //"error"
-				"noNoninteractiveElementInteractions": "off", //"error",
-				"noProcessGlobal": "off", //"info",
-				"noReactPropAssign": "off", //"warn",
+			"correctness": {
+				"noConstantMathMinMaxClamp": "warn",
+				"noProcessGlobal": "info",
+				"noReactPropAssignments": "warn",
 				"noRestrictedElements": {
-					"level": "off", //"error",
+					"level": "error",
 					"options": {
 						"elements": {
 							"br": "Line breaks should not be used in HTML"
 						}
 					}
 				},
-				"noSecrets": "off", //"error",
-				"noShadow": "off", //"warn",
-				"noTsIgnore": "off", //"error",
-				"noUnassignedVariables": "off", //"warn",
-				"noUnwantedPolyfillio": "off", //"error",
-				"noUselessBackrefInRegex": "off", //"error",
-				"noUselessEscapeInString": "off", //"warn",
-				"noUselessUndefined": "off", //"info",
-				"useAdjacentGetterSetter": "off", //"warn",
-				"useConsistentObjectDefinition": {
-					"level": "off", //"warn",
-					"options": {
-						"syntax": "shorthand"
-					}
-				},
-				"useConsistentResponse": "off", //"warn",
-				"useExhaustiveSwitchCases": "off", //"warn",
-				"useExplicitType": "off", //"warn",
-				"useExportsLast": "off", //"warn",
-				"useGoogleFontPreconnect": "off", //"warn",
-				"useIndexOf": "off", //"warn",
-				"useIterableCallbackReturn": "off", //"warn",
-				"useJsonImportAttribute": "off", //"error",
-				"useNumericSeparators": "off", //"info",
-				"useObjectSpread": "off", //"warn",
-				"useParseIntRadix": "off", //"error",
-				"useReadonlyClassProperties": {
-					"level": "off", //"warn",
-					"options": {
-						"checkAllProperties": false
-					}
-				},
-				"useSingleJsDocAsterisk": "off", //"info",
-				"useSortedClasses": {
-					"level": "off", //"warn",
-					"options": {
-						"attributes": ["classList"],
-						"functions": []
-					}
-				},
-				"useUnifiedTypeSignature": "off", //"warn",
-				"useUniqueElementIds": "off" //"warn",
+				"noUndeclaredDependencies": "warn",
+				"noUndeclaredVariables": "error",
+				"noUnusedFunctionParameters": "warn",
+				"noUnusedImports": "warn",
+				"noUnusedPrivateClassMembers": "warn",
+				"noUnusedVariables": "warn",
+				"useJsonImportAttributes": "error",
+				"useParseIntRadix": "error",
+				"useSingleJsDocAsterisk": "info",
+				"useUniqueElementIds": "warn"
+			},
+
+			"performance": {
+				"noAccumulatingSpread": "error",
+				"noAwaitInLoops": "warn",
+				"noBarrelFile": "warn",
+				"noDelete": "warn",
+				"noReExportAll": "error",
+				"noUnwantedPolyfillio": "error",
+				"useGoogleFontPreconnect": "warn",
+				"useTopLevelRegex": "warn"
 			},
 			"style": {
-				"noCommonJs": "error",
 				"noInferrableTypes": "error",
+				"noMagicNumbers": "warn",
 				"noNegationElse": "error",
 				"noNestedTernary": "info",
 				"noNonNullAssertion": "warn",
@@ -154,24 +126,22 @@
 								"selector": {
 									"kind": "variable"
 								},
-								"match": "[ijxy]|(.*)"
+								"match": "[abijxy]|(.*)"
 								// Formats omitted on purpose to fall through to the next rule
-							},
-							{
-								"match": "(.{2,})"
 							},
 							{
 								"selector": {
 									"kind": "functionParameter"
 								},
 								"formats": ["camelCase"],
-								"match": "_{0,1}((.*))"
+								"match": "[ab]|_{0,1}((.*))"
 							},
+
 							{
 								"selector": {
 									"kind": "objectLiteralProperty"
 								},
-								"formats": ["camelCase", "snake_case"],
+								"formats": ["camelCase", "snake_case", "CONSTANT_CASE"],
 								"match": "[_\\$]{0,1}(.+)"
 							},
 							{
@@ -254,6 +224,9 @@
 								},
 								"match": "__(.+)__|_(.+)|(.+)",
 								"formats": ["CONSTANT_CASE", "PascalCase", "camelCase"]
+							},
+							{
+								"match": "(.{2,})"
 							}
 						]
 					}
@@ -265,31 +238,75 @@
 				"useSingleVarDeclarator": "info",
 				"useThrowNewError": "warn",
 				"useThrowOnlyError": "error",
-				"useTrimStartEnd": "error"
+				"useTrimStartEnd": "error",
+				"useGroupedAccessorPairs": "warn",
+				"useConsistentObjectDefinitions": {
+					"level": "warn",
+					"options": {
+						"syntax": "shorthand"
+					}
+				},
+				"useExportsLast": "warn",
+				"useNumericSeparators": "info",
+				"useObjectSpread": "warn",
+				"useReadonlyClassProperties": {
+					"level": "warn",
+					"options": {
+						"checkAllProperties": false
+					}
+				},
+				"useUnifiedTypeSignatures": "warn"
 			},
 			"suspicious": {
-				"noExplicitAny": "warn",
+				"noApproximativeNumericConstant": "error",
+				"noArrayIndexKey": "error",
+				"noAssignInExpressions": "error",
+				"noAsyncPromiseExecutor": "error",
+				"noCatchAssign": "error",
+				"noClassAssign": "error",
+				"noCommentText": "error",
+				"noCompareNegZero": "error",
 				"noConfusingVoidType": "warn",
+				"noConsole": "warn",
 				"noEmptyBlock": "warn",
-				"noGlobalIsNan": "error",
+				"noEmptyBlockStatements": "error",
+				"noExplicitAny": "warn",
+				"noGlobalIsNan": "warn",
 				"noMisplacedAssertion": "off",
 				"useAwait": "error",
-				"useErrorMessage": "error",
-				"useNumberToFixedDigitsArgument": "warn"
+				"useErrorMessage": "warn",
+				"useNumberToFixedDigitsArgument": "warn",
+				"noConstantBinaryExpressions": "info",
+				"noTsIgnore": "error",
+				"noUnassignedVariables": "warn",
+				"noUselessEscapeInString": "warn",
+				"noUselessRegexBackrefs": "error",
+				"useStaticResponseMethods": "warn",
+				"useIterableCallbackReturn": "warn"
 			},
-			"correctness": {
-				"noUnusedFunctionParameters": "warn",
-				"noUnusedImports": "warn",
-				"noUnusedVariables": "warn",
-				"noUnusedPrivateClassMembers": "warn",
-				"noConstantMathMinMaxClamp": "warn",
-				"noUndeclaredDependencies": "warn",
-				"noUndeclaredVariables": "error"
+			// These are rules that are not yet stable and may change at any point.
+			// We'll use it as a way to keep track of interesting rules we may want to use in the future.
+			// Turn them on to the correct level before running `biome migrate` so they aren't off (comments are lost on migration)
+			"nursery": {
+				"noFloatingPromises": "off", //"error",
+				"noImportCycles": "off", //"error",
+				"noMisusedPromises": "off", //"error"
+				"noNonNullAssertedOptionalChain": "warn",
+				"noSecrets": "off", //"error",
+				"noShadow": "off", //"warn",
+				"noUselessUndefined": "off", //"info",
+				"useExhaustiveSwitchCases": "off", //"warn",
+				"useExplicitType": "off", //"warn",
+				"useSortedClasses": {
+					"level": "off", //"warn",
+					"options": {
+						"attributes": ["classList"],
+						"functions": []
+					}
+				}
 			},
-			"performance": {
-				"noBarrelFile": "warn",
-				"noReExportAll": "error",
-				"noDelete": "warn"
+			"a11y": {
+				"noNoninteractiveElementInteractions": "error"
 			}
 		}
 	},
@@ -321,6 +338,7 @@
 	"json": {
 		"formatter": {
 			"enabled": true,
+			"expand": "auto",
 			"trailingCommas": "none"
 		},
 		"parser": {
