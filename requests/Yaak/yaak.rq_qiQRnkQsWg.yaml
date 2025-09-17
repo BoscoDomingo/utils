@@ -2,7 +2,7 @@ type: http_request
 model: http_request
 id: rq_qiQRnkQsWg
 createdAt: 2025-07-16T15:58:27.688120100
-updatedAt: 2025-07-23T13:17:59.132332800
+updatedAt: 2025-09-12T18:15:27.381864900
 workspaceId: wk_ZmhNaPNifi
 folderId: fl_M5hQdeT4bt
 authentication: {}
@@ -13,7 +13,7 @@ description: ''
 headers: []
 method: GET
 name: Get all Prices
-sortPriority: -1752681507687.0
+sortPriority: 2000.0
 url: ${[ BASE_URL ]}/v1/prices
 urlParameters:
 - enabled: true

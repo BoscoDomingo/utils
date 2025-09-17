@@ -1,0 +1,13 @@
+type: folder
+model: folder
+id: fl_HKM3XFG9PE
+createdAt: 2025-09-12T18:15:25.333958100
+updatedAt: 2025-09-12T18:15:30.404676600
+workspaceId: wk_ZmhNaPNifi
+folderId: fl_M5hQdeT4bt
+authentication: {}
+authenticationType: null
+description: ''
+headers: []
+name: Subscription schedules
+sortPriority: 250.0

@@ -1,0 +1,26 @@
+type: http_request
+model: http_request
+id: rq_SrfVQUpseo
+createdAt: 2025-09-12T18:15:49.650320400
+updatedAt: 2025-09-13T01:21:16.758090500
+workspaceId: wk_ZmhNaPNifi
+folderId: fl_HKM3XFG9PE
+authentication: {}
+authenticationType: null
+body: {}
+bodyType: application/json
+description: ''
+headers:
+- enabled: true
+  name: Content-Type
+  value: application/json
+  id: CcM6IhXQyC
+method: POST
+name: Update subscription schedule
+sortPriority: 2000.0
+url: ${[ BASE_URL ]}/v1/subscription_schedules/sub_sched_1S6FprHVrYh5CfzFMSOTHpwE
+urlParameters:
+- enabled: true
+  name: ''
+  value: ''
+  id: a8CEHfWst4

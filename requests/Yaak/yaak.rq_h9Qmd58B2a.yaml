@@ -1,0 +1,27 @@
+type: http_request
+model: http_request
+id: rq_h9Qmd58B2a
+createdAt: 2025-09-12T18:15:34.662660700
+updatedAt: 2025-09-16T20:47:09.600329500
+workspaceId: wk_ZmhNaPNifi
+folderId: fl_HKM3XFG9PE
+authentication: {}
+authenticationType: null
+body:
+  text: "{\n  \n}"
+bodyType: application/json
+description: ''
+headers:
+- enabled: true
+  name: Content-Type
+  value: application/json
+  id: H8FdHXZYJt
+method: POST
+name: Create subscription schedule
+sortPriority: 1000.0
+url: ${[ BASE_URL ]}/v1/subscription_schedules
+urlParameters:
+- enabled: true
+  name: ''
+  value: ''
+  id: a8CEHfWst4

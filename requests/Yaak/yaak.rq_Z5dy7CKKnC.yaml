@@ -1,0 +1,26 @@
+type: http_request
+model: http_request
+id: rq_Z5dy7CKKnC
+createdAt: 2025-09-12T17:57:54.523399300
+updatedAt: 2025-09-15T19:31:12.434058200
+workspaceId: wk_ZmhNaPNifi
+folderId: fl_HKM3XFG9PE
+authentication: {}
+authenticationType: null
+body: {}
+bodyType: null
+description: ''
+headers: []
+method: GET
+name: Get subscription schedule
+sortPriority: 0.0
+url: ${[ BASE_URL ]}/v1/subscription_schedules/sub_sched_1S6FprHVrYh5CfzFMSOTHpwE
+urlParameters:
+- enabled: true
+  name: expand[]
+  value: subscription
+  id: TPYK8nywtk
+- enabled: true
+  name: ''
+  value: ''
+  id: 98yANDA4XM
