@@ -1,6 +1,12 @@
-/* Removes all optional properties of a type. Doesn't remove `undefined`s though
-
-Source: https://www.typescriptlang.org/play?ssl=27&ssc=2&pln=25&pc=1#code/JYOwLgpgTgZghgYwgAgArQM4HsTIN4BQyxyIcAthAFzIZhSgDmA3ESXI9aQK7kBG0ViWQwGEEABMMAfhroo2EAG0AukJIArLHwByFCLNr0m64nAkSoEDBhp0GIRsgA+ybpIgxQECQQC+BAQQAB4ADlhQYMhgAJ6hKADSEDEYAPIwACpxEAA8GQA0yACqAHzIALz4yEoJyKDIANbJWDDIGSo0GTUqyCGQkhjFyNLItTQgEABu0Mh+Sk0xLW1qQWERUbHxyABKEACO3MBWEkkpeWWVAKLBCAA23BK5p2mZ2XmF13cPuV0LS+2FdyPLwTCQlEqAjwgnwlVbhSLRbLIT73R6pUJgYA4OC3VBQLChDDnCpoYAIBrvHb7Q7HZ7nWEEBA4OjRGgo77ozHY3H4wk5eSKC5VMiUGgAIgAFlKxYUOFwAIwABlmyAA9KrkBIsNZSFgolYDkcUCAcABaAlcsi3ZAAA3MlmsGBtyFCvOgsUCqoAVARNigAIIkwjCEVcewmNhmTjjXgCKCsAJe1W+pGBq43VEQTlYq14glEgU4BkEdXIU2m5BWchYabIHC3GJ1jE5nGNZIYFNbXaG44AMWAEFuUlSIAbxMqwZINTquD+rQyyDggy6CR6fXEUipPZ8526w1GyHGU2gHTa3X8np9fuQACEg5HSPo7MZHKZF9GePxBA-7VYbM+HCcVwgU8bwJATAgk07FA70qbsaR8ftB2HUcYn5TAiyAA */
+/**
+ * Removes all optional properties of a type. Doesn't remove `undefined`s though
+ *
+ * @example
+ * type Example = RequiredProperties<{ a: string; b: string; c?: number }>;
+ * // Valid: { a: string; b: string }
+ *
+ * @see https://www.typescriptlang.org/play?ssl=27&ssc=2&pln=25&pc=1#code/JYOwLgpgTgZghgYwgAgArQM4HsTIN4BQyxyIcAthAFzIZhSgDmA3ESXI9aQK7kBG0ViWQwGEEABMMAfhroo2EAG0AukJIArLHwByFCLNr0m64nAkSoEDBhp0GIRsgA+ybpIgxQECQQC+BAQQAB4ADlhQYMhgAJ6hKADSEDEYAPIwACpxEAA8GQA0yACqAHzIALz4yEoJyKDIANbJWDDIGSo0GTUqyCGQkhjFyNLItTQgEABu0Mh+Sk0xLW1qQWERUbHxyABKEACO3MBWEkkpeWWVAKLBCAA23BK5p2mZ2XmF13cPuV0LS+2FsyPLwTCQlEqAjwgnwlVbhSLRbLIT73R6pUJgYA4OC3VBQLChDDnCpoYAIBrvHb7Q7HZ7nWEEBA4OjRGgo77ozHY3H4wk5eSKC5VMiUGgAIgAFlKxYUOFwAIwABlmyAA9KrkBIsNZSFkolYDkcUCAcABaAlcsi3ZAAA3MlmsGBtyFCvOgsUCqoAVARNigAIIkwjCEVcewmNhmTjjXgCKCsAJe1W+pGBq43VEQTlYq14glEgU4BkEdXIU2m5BWchYabIHC3GJ1jE5nGNZIYFNbXaG44AMWAEFuUlSIAbxMqwZINTquD+rQyyDggy6CR6fXEUipPZ8526w1GyHGU2gHTa3X8np9fuQACEg5HSPo7MZHKZF9GePxBA-7VYbM+HCcVwgU8bwJATAgk07FA70qbsaR8ftB2HUcYn5TAiyAA
+ */
 export type RequiredProperties<T> = {
 	[K in keyof T as T[K] extends Required<T>[K] ? K : never]: T[K];
 };
