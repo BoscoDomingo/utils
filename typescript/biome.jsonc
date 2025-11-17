@@ -1,5 +1,5 @@
 {
-	"$schema": "https://biomejs.dev/schemas/2.2.2/schema.json",
+	"$schema": "https://biomejs.dev/schemas/2.3.4/schema.json",
 	"assist": { "actions": { "source": { "organizeImports": "on" } } },
 	"files": {
 		"includes": [
@@ -40,7 +40,7 @@
 				"noExcessiveLinesPerFunction": {
 					"level": "warn",
 					"options": {
-						"maxLines": 100,
+						"maxLines": 120,
 						"skipBlankLines": true,
 						"skipIifes": false
 					}
@@ -53,6 +53,7 @@
 				"useDateNow": "warn",
 				"useIndexOf": "warn",
 				"useLiteralKeys": "warn",
+				"useOptionalChain": "info",
 				"useSimplifiedLogicExpression": "warn"
 			},
 			"correctness": {
@@ -111,6 +112,7 @@
 				"useConsistentMemberAccessibility": { "level": "warn", "options": { "accessibility": "noPublic" } },
 				"useDefaultParameterLast": "error",
 				"useEnumInitializers": "error",
+				"useExportsLast": "warn",
 				"useForOf": "warn",
 				"useImportType": "info",
 				"useLiteralEnumMembers": "error",
@@ -246,7 +248,6 @@
 						"syntax": "shorthand"
 					}
 				},
-				"useExportsLast": "warn",
 				"useNumericSeparators": "info",
 				"useObjectSpread": "warn",
 				"useReadonlyClassProperties": {
@@ -255,7 +256,14 @@
 						"checkAllProperties": false
 					}
 				},
-				"useUnifiedTypeSignatures": "warn"
+				"useUnifiedTypeSignatures": "warn",
+				"useConsistentTypeDefinitions": {
+					"level": "warn",
+					"options": {
+						"style": "type"
+					}
+				},
+				"useReactFunctionComponents": "warn"
 			},
 			"suspicious": {
 				"noApproximativeNumericConstant": "error",
@@ -282,17 +290,16 @@
 				"noUselessEscapeInString": "warn",
 				"noUselessRegexBackrefs": "error",
 				"useStaticResponseMethods": "warn",
-				"useIterableCallbackReturn": "warn"
+				"useIterableCallbackReturn": "warn",
+				"noNonNullAssertedOptionalChain": "warn"
 			},
 			// These are rules that are not yet stable and may change at any point.
 			// We'll use it as a way to keep track of interesting rules we may want to use in the future.
 			// Turn them on to the correct level before running `biome migrate` so they aren't off (comments are lost on migration)
 			"nursery": {
-				"noFloatingPromises": "off", //"error",
+				"noFloatingPromises": "error", //"warn",
 				"noImportCycles": "off", //"error",
 				"noMisusedPromises": "off", //"error"
-				"noNonNullAssertedOptionalChain": "warn",
-				"noSecrets": "off", //"error",
 				"noShadow": "off", //"warn",
 				"noUselessUndefined": "off", //"info",
 				"useExhaustiveSwitchCases": "off", //"warn",
@@ -307,11 +314,20 @@
 			},
 			"a11y": {
 				"noNoninteractiveElementInteractions": "error"
+			},
+			"security": {
+				"noSecrets": {
+					"level": "error",
+					"options": {
+						"entropyThreshold": 55
+					}
+				}
 			}
 		}
 	},
 	"overrides": [
 		{
+			// NestJS Services and Controllers need the actual import, even for types
 			"includes": ["**/src/**/*.service.ts", "**/src/**/*.controller.ts"],
 			"linter": {
 				"rules": {
