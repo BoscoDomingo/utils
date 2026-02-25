@@ -1,0 +1,83 @@
+name: Format & Lint
+
+on:
+  push:
+    paths: &paths
+      - "go/tools/zcp/**/*.go"
+      - "go/tools/zcp/go.mod"
+      - "go/tools/zcp/go.sum"
+      - "go/tools/zcp/.golangci.yml"
+      - "go/tools/zcp/.github/workflows/zcp-golangci-lint.yml"
+      - "go/tools/zcp/.github/workflows/zcp-tests.yml"
+      - ".github/workflows/zcp-golangci-lint.yml"
+      - ".github/workflows/zcp-tests.yml"
+  pull_request:
+    paths: *paths
+  workflow_dispatch:
+
+concurrency:
+  group: zcp-format-lint-${{ github.workflow }}-${{ github.ref }}
+  cancel-in-progress: true
+
+jobs:
+  format:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v6
+
+      - name: Setup Go with module cache
+        uses: actions/setup-go@v6
+        with:
+          go-version-file: go/tools/zcp/go.mod
+          cache: true
+          cache-dependency-path: |
+            go/tools/zcp/go.mod
+            go/tools/zcp/go.sum
+
+      - name: Cache golangci-lint data
+        uses: actions/cache@v5
+        with:
+          path: ~/.cache/golangci-lint
+          key: ${{ runner.os }}-golangci-format-${{ hashFiles('go/tools/zcp/go.mod', 'go/tools/zcp/go.sum', 'go/tools/zcp/.golangci.yml') }}
+          restore-keys: |
+            ${{ runner.os }}-golangci-format-
+
+      - name: Check formatting via golangci-lint
+        uses: golangci/golangci-lint-action@v9
+        with:
+          version: latest
+          working-directory: go/tools/zcp
+          args: fmt --diff --timeout=5m ./...
+          skip-cache: false
+
+  lint:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v6
+
+      - name: Setup Go with module cache
+        uses: actions/setup-go@v6
+        with:
+          go-version-file: go/tools/zcp/go.mod
+          cache: true
+          cache-dependency-path: |
+            go/tools/zcp/go.mod
+            go/tools/zcp/go.sum
+
+      - name: Cache golangci-lint data
+        uses: actions/cache@v5
+        with:
+          path: ~/.cache/golangci-lint
+          key: ${{ runner.os }}-golangci-${{ hashFiles('go/tools/zcp/go.mod', 'go/tools/zcp/go.sum', 'go/tools/zcp/.golangci.yml') }}
+          restore-keys: |
+            ${{ runner.os }}-golangci-
+
+      - name: Run golangci-lint
+        uses: golangci/golangci-lint-action@v9
+        with:
+          version: latest
+          working-directory: go/tools/zcp
+          args: --timeout=5m ./...
+          skip-cache: false
