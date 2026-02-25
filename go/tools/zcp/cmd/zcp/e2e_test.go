@@ -166,45 +166,96 @@ func TestCLIFlagsE2E(t *testing.T) {
 		}
 	}
 
-	t.Run("recursive_short_flag", func(t *testing.T) {
-		t.Parallel()
-		runRecursiveCase(t, "-r")
-	})
+	runVerboseCase := func(t *testing.T, verboseFlag string) {
+		t.Helper()
 
-	t.Run("recursive_long_flag", func(t *testing.T) {
-		t.Parallel()
-		runRecursiveCase(t, "--recursive")
-	})
+		tempDir := t.TempDir()
+		sourceFile := filepath.Join(tempDir, "source.txt")
+		destinationFile := filepath.Join(tempDir, "destination.txt")
 
-	t.Run("force_short_flag", func(t *testing.T) {
-		t.Parallel()
-		runForceCase(t, "-f")
-	})
+		if err := os.WriteFile(sourceFile, []byte("verbose-output"), 0o644); err != nil {
+			t.Fatalf("write source file: %v", err)
+		}
 
-	t.Run("force_long_flag", func(t *testing.T) {
-		t.Parallel()
-		runForceCase(t, "--force")
-	})
+		stdout, stderr, err := runCLI(t, tempDir, "-q", verboseFlag, sourceFile, destinationFile)
+		if err != nil {
+			t.Fatalf("verbose copy failed: %v (stdout=%q, stderr=%q)", err, stdout, stderr)
+		}
+		if stderr != "" {
+			t.Fatalf("expected empty stderr, got %q", stderr)
+		}
+		if !strings.Contains(stdout, "created: "+destinationFile) {
+			t.Fatalf("expected verbose created-file line, got %q", stdout)
+		}
+		if !strings.Contains(stdout, "Copied 1 file(s)") {
+			t.Fatalf("expected summary in stdout, got %q", stdout)
+		}
+	}
 
-	t.Run("preserve_short_flag", func(t *testing.T) {
-		t.Parallel()
-		runPreserveCase(t, "-p")
-	})
+	type flagVariant struct {
+		name string
+		flag string
+	}
 
-	t.Run("preserve_long_flag", func(t *testing.T) {
-		t.Parallel()
-		runPreserveCase(t, "--preserve")
-	})
+	type shortLongFlagSuite struct {
+		name     string
+		variants []flagVariant
+		run      func(t *testing.T, flag string)
+	}
 
-	t.Run("quiet_short_flag", func(t *testing.T) {
-		t.Parallel()
-		runQuietCase(t, "-q")
-	})
+	shortLongSuites := []shortLongFlagSuite{
+		{
+			name: "recursive",
+			variants: []flagVariant{
+				{name: "short", flag: "-r"},
+				{name: "long", flag: "--recursive"},
+			},
+			run: runRecursiveCase,
+		},
+		{
+			name: "force",
+			variants: []flagVariant{
+				{name: "short", flag: "-f"},
+				{name: "long", flag: "--force"},
+			},
+			run: runForceCase,
+		},
+		{
+			name: "preserve",
+			variants: []flagVariant{
+				{name: "short", flag: "-p"},
+				{name: "long", flag: "--preserve"},
+			},
+			run: runPreserveCase,
+		},
+		{
+			name: "quiet",
+			variants: []flagVariant{
+				{name: "short", flag: "-q"},
+				{name: "long", flag: "--quiet"},
+			},
+			run: runQuietCase,
+		},
+		{
+			name: "verbose",
+			variants: []flagVariant{
+				{name: "short", flag: "-v"},
+				{name: "long", flag: "--verbose"},
+			},
+			run: runVerboseCase,
+		},
+	}
 
-	t.Run("quiet_long_flag", func(t *testing.T) {
-		t.Parallel()
-		runQuietCase(t, "--quiet")
-	})
+	for _, suite := range shortLongSuites {
+		suite := suite
+		for _, variant := range suite.variants {
+			variant := variant
+			t.Run(fmt.Sprintf("%s_%s_flag", suite.name, variant.name), func(t *testing.T) {
+				t.Parallel()
+				suite.run(t, variant.flag)
+			})
+		}
+	}
 
 	t.Run("buffer_size_flag", func(t *testing.T) {
 		t.Parallel()

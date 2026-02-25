@@ -1,4 +1,4 @@
-name: zcp golangci-lint
+name: Format & Lint
 
 on:
   push:
@@ -8,21 +8,48 @@ on:
       - "go/tools/zcp/go.sum"
       - "go/tools/zcp/.golangci.yml"
       - "go/tools/zcp/.github/workflows/zcp-golangci-lint.yml"
+      - "go/tools/zcp/.github/workflows/zcp-tests.yml"
       - ".github/workflows/zcp-golangci-lint.yml"
+      - ".github/workflows/zcp-tests.yml"
   pull_request:
     paths: *paths
   workflow_dispatch:
 
 concurrency:
-  group: zcp-golangci-lint-${{ github.workflow }}-${{ github.ref }}
+  group: zcp-format-lint-${{ github.workflow }}-${{ github.ref }}
   cancel-in-progress: true
 
 jobs:
-  golangci:
+  format:
     runs-on: ubuntu-latest
     steps:
       - name: Checkout
-        uses: actions/checkout@v4
+        uses: actions/checkout@v6
+
+      - name: Setup Go with module cache
+        uses: actions/setup-go@v6
+        with:
+          go-version-file: go/tools/zcp/go.mod
+          cache: true
+          cache-dependency-path: |
+            go/tools/zcp/go.mod
+            go/tools/zcp/go.sum
+
+      - name: Check gofmt formatting
+        working-directory: go/tools/zcp
+        run: |
+          unformatted="$(gofmt -l .)"
+          if [ -n "$unformatted" ]; then
+            echo "The following files are not gofmt-formatted:"
+            echo "$unformatted"
+            exit 1
+          fi
+
+  lint:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v6
 
       - name: Setup Go with module cache
         uses: actions/setup-go@v6

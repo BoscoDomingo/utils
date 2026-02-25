@@ -14,6 +14,7 @@ type options struct {
 	force      bool
 	preserve   bool
 	quiet      bool
+	verbose    bool
 	bufferSize int
 }
 
@@ -40,6 +41,14 @@ func Run(args []string, stdout io.Writer, stderr io.Writer) error {
 	}
 	progress.stop()
 
+	if opts.verbose {
+		for _, op := range plan {
+			if op.kind == operationCopyFile {
+				fmt.Fprintf(stdout, "created: %s\n", op.destination)
+			}
+		}
+	}
+
 	fmt.Fprintf(stdout, "Copied %d file(s), %s total.\n", countFiles(plan), humanizeBytes(totalBytes))
 	return nil
 }
@@ -60,6 +69,8 @@ func parseArgs(args []string, stderr io.Writer) (options, []string, string, erro
 	fs.BoolVar(&opts.preserve, "preserve", false, "preserve file mode and modification time")
 	fs.BoolVar(&opts.quiet, "q", false, "disable progress output")
 	fs.BoolVar(&opts.quiet, "quiet", false, "disable progress output")
+	fs.BoolVar(&opts.verbose, "v", false, "print created file names")
+	fs.BoolVar(&opts.verbose, "verbose", false, "print created file names")
 	fs.IntVar(&opts.bufferSize, "buffer-size", defaultBufferSize, "copy buffer size in bytes")
 
 	fs.Usage = func() {
