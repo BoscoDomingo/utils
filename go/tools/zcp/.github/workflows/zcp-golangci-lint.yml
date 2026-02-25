@@ -35,15 +35,21 @@ jobs:
             go/tools/zcp/go.mod
             go/tools/zcp/go.sum
 
-      - name: Check gofmt formatting
-        working-directory: go/tools/zcp
-        run: |
-          unformatted="$(gofmt -l .)"
-          if [ -n "$unformatted" ]; then
-            echo "The following files are not gofmt-formatted:"
-            echo "$unformatted"
-            exit 1
-          fi
+      - name: Cache golangci-lint data
+        uses: actions/cache@v5
+        with:
+          path: ~/.cache/golangci-lint
+          key: ${{ runner.os }}-golangci-format-${{ hashFiles('go/tools/zcp/go.mod', 'go/tools/zcp/go.sum', 'go/tools/zcp/.golangci.yml') }}
+          restore-keys: |
+            ${{ runner.os }}-golangci-format-
+
+      - name: Check formatting via golangci-lint
+        uses: golangci/golangci-lint-action@v9
+        with:
+          version: latest
+          working-directory: go/tools/zcp
+          args: --disable-all -E gofmt --timeout=5m ./...
+          skip-cache: false
 
   lint:
     runs-on: ubuntu-latest
