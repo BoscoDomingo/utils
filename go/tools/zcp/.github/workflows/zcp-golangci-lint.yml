@@ -2,7 +2,7 @@ name: zcp golangci-lint
 
 on:
   push:
-    paths:
+    paths: &paths
       - "go/tools/zcp/**/*.go"
       - "go/tools/zcp/go.mod"
       - "go/tools/zcp/go.sum"
@@ -10,13 +10,7 @@ on:
       - "go/tools/zcp/.github/workflows/zcp-golangci-lint.yml"
       - ".github/workflows/zcp-golangci-lint.yml"
   pull_request:
-    paths:
-      - "go/tools/zcp/**/*.go"
-      - "go/tools/zcp/go.mod"
-      - "go/tools/zcp/go.sum"
-      - "go/tools/zcp/.golangci.yml"
-      - "go/tools/zcp/.github/workflows/zcp-golangci-lint.yml"
-      - ".github/workflows/zcp-golangci-lint.yml"
+    paths: *paths
   workflow_dispatch:
 
 concurrency:
@@ -31,7 +25,7 @@ jobs:
         uses: actions/checkout@v4
 
       - name: Setup Go with module cache
-        uses: actions/setup-go@v5
+        uses: actions/setup-go@v6
         with:
           go-version-file: go/tools/zcp/go.mod
           cache: true
@@ -40,7 +34,7 @@ jobs:
             go/tools/zcp/go.sum
 
       - name: Cache golangci-lint data
-        uses: actions/cache@v4
+        uses: actions/cache@v5
         with:
           path: ~/.cache/golangci-lint
           key: ${{ runner.os }}-golangci-${{ hashFiles('go/tools/zcp/go.mod', 'go/tools/zcp/go.sum', 'go/tools/zcp/.golangci.yml') }}
@@ -48,7 +42,7 @@ jobs:
             ${{ runner.os }}-golangci-
 
       - name: Run golangci-lint
-        uses: golangci/golangci-lint-action@v6
+        uses: golangci/golangci-lint-action@v9
         with:
           version: latest
           working-directory: go/tools/zcp
