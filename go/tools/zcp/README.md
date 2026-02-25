@@ -73,7 +73,8 @@ zcp -q -r logs /tmp/logs-copy
 From this directory:
 
 ```bash
-go build -o bin/zcp .
+mkdir -p bin
+go build -o bin/zcp ./cmd/zcp
 ```
 
 ### Cross-compile
@@ -81,13 +82,15 @@ go build -o bin/zcp .
 Linux:
 
 ```bash
-GOOS=linux GOARCH=amd64 go build -o bin/zcp-linux-amd64 .
+mkdir -p bin
+GOOS=linux GOARCH=amd64 go build -o bin/zcp-linux-amd64 ./cmd/zcp
 ```
 
 Windows:
 
 ```bash
-GOOS=windows GOARCH=amd64 go build -o bin/zcp-windows-amd64.exe .
+mkdir -p bin
+GOOS=windows GOARCH=amd64 go build -o bin/zcp-windows-amd64.exe ./cmd/zcp
 ```
 
 ## Notes

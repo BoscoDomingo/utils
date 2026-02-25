@@ -1,11 +1,10 @@
-package main
+package zcp
 
 import (
 	"errors"
 	"flag"
 	"fmt"
 	"io"
-	"os"
 )
 
 const defaultBufferSize = 1024 * 1024
@@ -18,14 +17,7 @@ type options struct {
 	bufferSize int
 }
 
-func main() {
-	if err := run(os.Args[1:], os.Stdout, os.Stderr); err != nil {
-		fmt.Fprintf(os.Stderr, "zcp: %v\n", err)
-		os.Exit(1)
-	}
-}
-
-func run(args []string, stdout io.Writer, stderr io.Writer) error {
+func Run(args []string, stdout io.Writer, stderr io.Writer) error {
 	opts, sources, destination, err := parseArgs(args, stderr)
 	if err != nil {
 		if errors.Is(err, flag.ErrHelp) {
