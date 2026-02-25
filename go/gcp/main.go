@@ -46,6 +46,7 @@ func run(args []string, stdout io.Writer, stderr io.Writer) error {
 	if err := executePlan(plan, opts, progress); err != nil {
 		return err
 	}
+	progress.stop()
 
 	fmt.Fprintf(stdout, "Copied %d file(s), %s total.\n", countFiles(plan), humanizeBytes(totalBytes))
 	return nil
