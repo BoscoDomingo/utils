@@ -20,7 +20,7 @@ type options struct {
 
 func main() {
 	if err := run(os.Args[1:], os.Stdout, os.Stderr); err != nil {
-		fmt.Fprintf(os.Stderr, "gcp: %v\n", err)
+		fmt.Fprintf(os.Stderr, "zcp: %v\n", err)
 		os.Exit(1)
 	}
 }
@@ -57,7 +57,7 @@ func parseArgs(args []string, stderr io.Writer) (options, []string, string, erro
 		bufferSize: defaultBufferSize,
 	}
 
-	fs := flag.NewFlagSet("gcp", flag.ContinueOnError)
+	fs := flag.NewFlagSet("zcp", flag.ContinueOnError)
 	fs.SetOutput(stderr)
 
 	fs.BoolVar(&opts.recursive, "r", false, "copy directories recursively")
@@ -71,10 +71,10 @@ func parseArgs(args []string, stderr io.Writer) (options, []string, string, erro
 	fs.IntVar(&opts.bufferSize, "buffer-size", defaultBufferSize, "copy buffer size in bytes")
 
 	fs.Usage = func() {
-		fmt.Fprintln(stderr, "gcp: copy files and directories with a progress bar")
+		fmt.Fprintln(stderr, "zcp: copy files and directories with a progress bar")
 		fmt.Fprintln(stderr)
 		fmt.Fprintln(stderr, "Usage:")
-		fmt.Fprintln(stderr, "  gcp [options] SOURCE... DEST")
+		fmt.Fprintln(stderr, "  zcp [options] SOURCE... DEST")
 		fmt.Fprintln(stderr)
 		fmt.Fprintln(stderr, "Options:")
 		fs.PrintDefaults()

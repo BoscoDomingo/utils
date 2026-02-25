@@ -1,6 +1,6 @@
-# gcp (Go Copy with Progress)
+# zcp (Zippy Copy with Progress)
 
-`gcp` is a small cross-platform CLI (Linux/Windows/macOS) that copies files and directories while showing a live progress bar.
+`zcp` is a small cross-platform CLI (Linux/Windows/macOS) that copies files and directories while showing a live progress bar.
 
 It is inspired by the Python `gcp` utility but implemented in pure Go.
 
@@ -19,7 +19,7 @@ It is inspired by the Python `gcp` utility but implemented in pure Go.
 ## Usage
 
 ```bash
-gcp [options] SOURCE... DEST
+zcp [options] SOURCE... DEST
 ```
 
 ### Examples
@@ -27,37 +27,37 @@ gcp [options] SOURCE... DEST
 Copy a single file:
 
 ```bash
-gcp movie.mkv /mnt/backup/movie.mkv
+zcp movie.mkv /mnt/backup/movie.mkv
 ```
 
 Copy a directory recursively:
 
 ```bash
-gcp -r photos /mnt/backup/
+zcp -r photos /mnt/backup/
 ```
 
 Copy multiple sources into an existing destination directory:
 
 ```bash
-gcp -r folder_a folder_b file.txt /mnt/backup/
+zcp -r folder_a folder_b file.txt /mnt/backup/
 ```
 
 Overwrite existing files:
 
 ```bash
-gcp -f large.iso /mnt/backup/large.iso
+zcp -f large.iso /mnt/backup/large.iso
 ```
 
 Preserve source mode + mtime:
 
 ```bash
-gcp -p -r assets ./assets-copy
+zcp -p -r assets ./assets-copy
 ```
 
 Disable progress output:
 
 ```bash
-gcp -q -r logs /tmp/logs-copy
+zcp -q -r logs /tmp/logs-copy
 ```
 
 ## Options
@@ -73,7 +73,7 @@ gcp -q -r logs /tmp/logs-copy
 From this directory:
 
 ```bash
-go build -o bin/gcp .
+go build -o bin/zcp .
 ```
 
 ### Cross-compile
@@ -81,13 +81,13 @@ go build -o bin/gcp .
 Linux:
 
 ```bash
-GOOS=linux GOARCH=amd64 go build -o bin/gcp-linux-amd64 .
+GOOS=linux GOARCH=amd64 go build -o bin/zcp-linux-amd64 .
 ```
 
 Windows:
 
 ```bash
-GOOS=windows GOARCH=amd64 go build -o bin/gcp-windows-amd64.exe .
+GOOS=windows GOARCH=amd64 go build -o bin/zcp-windows-amd64.exe .
 ```
 
 ## Notes
