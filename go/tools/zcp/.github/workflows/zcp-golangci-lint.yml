@@ -48,7 +48,7 @@ jobs:
         with:
           version: latest
           working-directory: go/tools/zcp
-          args: --disable-all -E gofumpt -E goimports -E golines --timeout=5m ./...
+          args: fmt --diff --timeout=5m ./...
           skip-cache: false
 
   lint:
