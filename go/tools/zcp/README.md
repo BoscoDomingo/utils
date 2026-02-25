@@ -24,6 +24,15 @@ https://manpages.ubuntu.com/manpages/focal/man1/gcp.1.html
 zcp [options] SOURCE... DEST
 ```
 
+### Options
+
+- `-r`, `--recursive`: copy directories recursively
+- `-f`, `--force`: overwrite destination files
+- `-p`, `--preserve`: preserve mode and modification time
+- `-q`, `--quiet`: disable progress output
+- `-v`, `--verbose`: print created file names
+- `--buffer-size`: copy buffer size in bytes (default `1048576`)
+
 ### Examples
 
 Copy a single file:
@@ -67,15 +76,6 @@ Verbose file listing:
 ```bash
 zcp -v -r photos /mnt/backup/
 ```
-
-## Options
-
-- `-r`, `--recursive`: copy directories recursively
-- `-f`, `--force`: overwrite destination files
-- `-p`, `--preserve`: preserve mode and modification time
-- `-q`, `--quiet`: disable progress output
-- `-v`, `--verbose`: print created file names
-- `--buffer-size`: copy buffer size in bytes (default `1048576`)
 
 ## Build
 
