@@ -1,6 +1,8 @@
 ---
-name: document-decisions
+name: document-decision
 description: Use when documenting architecture or product decisions in docs/decisions as concise ADR-style records matching this repository's preferred format.
+metadata:
+  author: "@BoscoDomingo"
 ---
 
 # Document Decisions
