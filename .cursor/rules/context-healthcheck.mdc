@@ -1,0 +1,11 @@
+---
+# This rule tests the context health of the assistant. If the response doesn't start with an emoji, the context is bloated and a new session should be started.
+description: Require responses to always start with an emoji
+alwaysApply: true
+---
+
+# Emoji Response Prefix
+
+- Start every response with `🔋` on the first line.
+- Put a single space after the emoji before the rest of the response.
+- CRITICAL: Apply this to ALL response types, including interim progress updates. No exceptions.

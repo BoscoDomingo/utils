@@ -1,0 +1,6 @@
+
+When performing any work, ALWAYS check first if decisions have been made about the work, or if documentation exists that shapes how the work should be performed.
+
+In the Armoury, reading the `docs/` folder(s) should be the first thing you do before any work is done. Check root `docs/INDEX.md` first, then follow it to the per-folder `INDEX.md` files it lists (workspace and any sub-project under `tools/<name>/docs/...`), and only open the underlying documentation files when an index row signals they are relevant.
+
+You MUST list the documentation you read in the plan or directly in the chat if not creating a plan. This includes style guides, code standards, project conventions, and any other documentation that is relevant to the work.

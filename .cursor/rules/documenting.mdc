@@ -1,0 +1,8 @@
+---
+description: Avoid documentation split-brain by linking to source files instead of duplicating
+alwaysApply: true
+---
+
+# Avoiding split-brain
+
+NEVER re-state what is already in other files. Reference the file instead with a link.
