@@ -1,5 +1,5 @@
 {
-	"$schema": "https://biomejs.dev/schemas/2.3.4/schema.json",
+	"$schema": "https://biomejs.dev/schemas/2.4.16/schema.json",
 	"assist": { "actions": { "source": { "organizeImports": "on" } } },
 	"files": {
 		"includes": [
@@ -54,7 +54,8 @@
 				"useIndexOf": "warn",
 				"useLiteralKeys": "warn",
 				"useOptionalChain": "info",
-				"useSimplifiedLogicExpression": "warn"
+				"useSimplifiedLogicExpression": "warn",
+				"noUselessUndefined": "info"
 			},
 			"correctness": {
 				"noConstantMathMinMaxClamp": "warn",
@@ -109,7 +110,10 @@
 				"useCollapsedIf": "error",
 				"useConsistentArrayType": "warn",
 				"useConsistentBuiltinInstantiation": "warn",
-				"useConsistentMemberAccessibility": { "level": "warn", "options": { "accessibility": "noPublic" } },
+				"useConsistentMemberAccessibility": {
+					"level": "warn",
+					"options": { "accessibility": "noPublic" }
+				},
 				"useDefaultParameterLast": "error",
 				"useEnumInitializers": "error",
 				"useExportsLast": "warn",
@@ -291,17 +295,16 @@
 				"noUselessRegexBackrefs": "error",
 				"useStaticResponseMethods": "warn",
 				"useIterableCallbackReturn": "warn",
-				"noNonNullAssertedOptionalChain": "warn"
+				"noNonNullAssertedOptionalChain": "warn",
+				"noImportCycles": "error"
 			},
 			// These are rules that are not yet stable and may change at any point.
 			// We'll use it as a way to keep track of interesting rules we may want to use in the future.
 			// Turn them on to the correct level before running `biome migrate` so they aren't off (comments are lost on migration)
 			"nursery": {
 				"noFloatingPromises": "error", //"warn",
-				"noImportCycles": "off", //"error",
 				"noMisusedPromises": "off", //"error"
 				"noShadow": "off", //"warn",
-				"noUselessUndefined": "off", //"info",
 				"useExhaustiveSwitchCases": "off", //"warn",
 				"useExplicitType": "off", //"warn",
 				"useSortedClasses": {
@@ -310,7 +313,21 @@
 						"attributes": ["classList"],
 						"functions": []
 					}
-				}
+				},
+				"noMisleadingReturnType": "off", //"error"
+				"noBaseToString": "off", //"warn"
+				"noUselessReturn": "off", //"warn",
+				"noDuplicateEnumValues": "off", //"error",
+				"noUselessTypeConversion": "off", //"warn",
+				"useAwaitThenable": "off", //"error",
+				"useConsistentEnumValueType": "off", //"warn",
+				"useRegexpTest": "off", //"warn",
+				"useConsistentTestIt": "off", //"error",
+				"useConsistentMethodSignatures": "off", //"error",
+				"noIdenticalTestTitle": "off", //"error",
+				"useTestHooksInOrder": "off", //"error",
+				"useTestHooksOnTop": "off", //"error",
+				"noUnsafePlusOperands": "off", //"error",
 			},
 			"a11y": {
 				"noNoninteractiveElementInteractions": "error"
@@ -346,7 +363,16 @@
 			"semicolons": "always",
 			"trailingCommas": "all"
 		},
-		"globals": ["_", "describe", "it", "expect", "beforeEach", "afterEach", "beforeAll", "afterAll"],
+		"globals": [
+			"_",
+			"describe",
+			"it",
+			"expect",
+			"beforeEach",
+			"afterEach",
+			"beforeAll",
+			"afterAll"
+		],
 		"parser": {
 			"unsafeParameterDecoratorsEnabled": true
 		}
