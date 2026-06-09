@@ -3,3 +3,5 @@
 typescript/scripts/fetch_and_replay_stripe_webhooks/failed_payloads.json
 
 **/bin
+
+**/__pycache__

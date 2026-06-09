@@ -1,0 +1,28 @@
+#!/bin/sh
+set -eu
+
+backend_name=${0##*/}
+: "${QQ_FAKE_CAPTURE_DIR:?QQ_FAKE_CAPTURE_DIR is required}"
+
+printf '%s\n' "$backend_name" > "$QQ_FAKE_CAPTURE_DIR/selected-backend"
+
+argv_file="$QQ_FAKE_CAPTURE_DIR/$backend_name.argv0"
+: > "$argv_file"
+for arg in "$@"; do
+	printf '%s\0' "$arg" >> "$argv_file"
+done
+
+if [ "${QQ_FAKE_STDOUT:-}" != "" ]; then
+	printf '%s' "$QQ_FAKE_STDOUT"
+else
+	printf 'fake stdout from %s\n' "$backend_name"
+fi
+
+if [ "${QQ_FAKE_STDERR:-}" != "" ]; then
+	printf '%s' "$QQ_FAKE_STDERR" >&2
+fi
+
+if [ "${QQ_FAKE_FAIL_BACKEND:-}" = "$backend_name" ]; then
+	exit "${QQ_FAKE_EXIT_CODE:-42}"
+fi
+
