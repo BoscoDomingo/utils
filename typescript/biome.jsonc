@@ -1,5 +1,5 @@
 {
-	"$schema": "https://biomejs.dev/schemas/2.4.16/schema.json",
+	"$schema": "https://biomejs.dev/schemas/2.5.0/schema.json",
 	"assist": { "actions": { "source": { "organizeImports": "on" } } },
 	"files": {
 		"includes": [
@@ -21,8 +21,8 @@
 			"!**/*.yml",
 			"!**/*.dockerignore",
 			"!**/*.Dockerfile",
-			"!**/Dockerfile"
-		]
+			"!**/Dockerfile",
+		],
 	},
 	"formatter": {
 		"enabled": true,
@@ -30,32 +30,35 @@
 		"indentStyle": "tab",
 		"indentWidth": 2,
 		"lineEnding": "lf",
-		"lineWidth": 120
+		"lineWidth": 120,
 	},
 	"linter": {
 		"enabled": true,
 		"rules": {
-			"recommended": true,
+			"preset": "recommended",
 			"complexity": {
+				"noDivRegex": "warn",
 				"noExcessiveLinesPerFunction": {
 					"level": "warn",
 					"options": {
 						"maxLines": 120,
 						"skipBlankLines": true,
-						"skipIifes": false
-					}
+						"skipIifes": false,
+					},
 				},
 				"noForEach": "error",
+				"noRedundantDefaultExport": "error",
 				"noStaticOnlyClass": "off",
 				"noUselessContinue": "warn",
+				"noUselessReturn": "warn",
 				"noUselessStringConcat": "error",
+				"noUselessUndefined": "info",
 				"noUselessUndefinedInitialization": "warn",
 				"useDateNow": "warn",
 				"useIndexOf": "warn",
 				"useLiteralKeys": "warn",
 				"useOptionalChain": "info",
 				"useSimplifiedLogicExpression": "warn",
-				"noUselessUndefined": "info"
 			},
 			"correctness": {
 				"noConstantMathMinMaxClamp": "warn",
@@ -65,9 +68,9 @@
 					"level": "error",
 					"options": {
 						"elements": {
-							"br": "Line breaks should not be used in HTML"
-						}
-					}
+							"br": "Line breaks should not be used in HTML",
+						},
+					},
 				},
 				"noUndeclaredDependencies": "warn",
 				"noUndeclaredVariables": "error",
@@ -78,20 +81,34 @@
 				"useJsonImportAttributes": "error",
 				"useParseIntRadix": "error",
 				"useSingleJsDocAsterisk": "info",
-				"useUniqueElementIds": "warn"
+				"useUniqueElementIds": "warn",
 			},
-
 			"performance": {
 				"noAccumulatingSpread": "error",
 				"noAwaitInLoops": "warn",
 				"noBarrelFile": "warn",
 				"noDelete": "warn",
+				"noJsxPropsBind": "warn",
 				"noReExportAll": "error",
+				"noSyncScripts": "warn",
 				"noUnwantedPolyfillio": "error",
 				"useGoogleFontPreconnect": "warn",
-				"useTopLevelRegex": "warn"
+				"useTopLevelRegex": "warn",
 			},
 			"style": {
+        "noExcessiveLinesPerFile": {
+        	"level": "info",
+          "options": {
+            "maxLines": 500,
+            "skipBlankLines": true
+          }
+        },
+				"noIncrementDecrement": {
+					"level": "warn",
+					"options": {
+						"allowForLoopAfterthoughts": true,
+					},
+				},
 				"noInferrableTypes": "error",
 				"noMagicNumbers": "warn",
 				"noNegationElse": "error",
@@ -110,14 +127,30 @@
 				"useCollapsedIf": "error",
 				"useConsistentArrayType": "warn",
 				"useConsistentBuiltinInstantiation": "warn",
+				"useConsistentEnumValueType": "warn",
 				"useConsistentMemberAccessibility": {
 					"level": "warn",
-					"options": { "accessibility": "noPublic" }
+					"options": { "accessibility": "noPublic" },
+				},
+				"useConsistentMethodSignatures": "error",
+				"useConsistentObjectDefinitions": {
+					"level": "warn",
+					"options": {
+						"syntax": "shorthand",
+					},
+				},
+				"useConsistentTypeDefinitions": {
+					"level": "warn",
+					"options": {
+						"style": "type",
+					},
 				},
 				"useDefaultParameterLast": "error",
 				"useEnumInitializers": "error",
+				"useErrorCause": "warn",
 				"useExportsLast": "warn",
 				"useForOf": "warn",
+				"useGroupedAccessorPairs": "warn",
 				"useImportType": "info",
 				"useLiteralEnumMembers": "error",
 				"useNamingConvention": {
@@ -130,144 +163,132 @@
 							// Place stricter rules above looser rules if they both target the same element
 							{
 								"selector": {
-									"kind": "variable"
+									"kind": "variable",
 								},
-								"match": "[abijxy]|(.*)"
+								"match": "[abijxy]|(.*)",
 								// Formats omitted on purpose to fall through to the next rule
 							},
 							{
 								"selector": {
-									"kind": "functionParameter"
+									"kind": "functionParameter",
 								},
 								"formats": ["camelCase"],
-								"match": "[ab]|_{0,1}((.*))"
+								"match": "[ab]|_{0,1}((.*))",
 							},
 
 							{
 								"selector": {
-									"kind": "objectLiteralProperty"
+									"kind": "objectLiteralProperty",
 								},
 								"formats": ["camelCase", "snake_case", "CONSTANT_CASE"],
-								"match": "[_\\$]{0,1}(.+)"
+								"match": "[_\\$]{0,1}(.+)",
 							},
 							{
 								"selector": {
-									"kind": "typeParameter"
+									"kind": "typeParameter",
 								},
-								"formats": ["PascalCase"]
+								"formats": ["PascalCase"],
 							},
 							{
 								"selector": {
-									"kind": "typeMember"
+									"kind": "typeMember",
 								},
 								"formats": ["camelCase", "snake_case"],
-								"match": "[_\\$]{0,1}(.+)"
+								"match": "[_\\$]{0,1}(.+)",
 							},
 							{
 								"selector": {
-									"kind": "catchParameter"
+									"kind": "catchParameter",
 								},
 								"match": "e|(.{2,})",
-								"formats": ["camelCase"]
+								"formats": ["camelCase"],
 							},
 							// All methods should have at least 3 characters. and private methods should not be prefixed with underscore
 							{
 								"selector": {
-									"kind": "classMethod"
+									"kind": "classMethod",
 								},
 								"formats": ["camelCase"],
-								"match": "(.{3,})"
+								"match": "(.{3,})",
 							},
 							{
 								"selector": {
 									"kind": "classProperty",
-									"modifiers": ["private", "readonly"]
+									"modifiers": ["private", "readonly"],
 								},
 								"formats": ["CONSTANT_CASE", "camelCase"],
-								"match": "_(.+)"
+								"match": "_(.+)",
 							},
 							{
 								"selector": {
 									"kind": "classProperty",
-									"modifiers": ["private"]
+									"modifiers": ["private"],
 								},
 								"formats": ["camelCase"],
-								"match": "_(.+)"
+								"match": "_(.+)",
 							},
 							{
 								"selector": {
 									"kind": "classProperty",
-									"modifiers": ["static", "readonly"]
+									"modifiers": ["static", "readonly"],
 								},
-								"formats": ["CONSTANT_CASE"]
+								"formats": ["CONSTANT_CASE"],
 							},
 							// Private members (except methods) should be prefixed with underscore
 							{
 								"selector": {
 									"kind": "classMember",
-									"modifiers": ["private"]
+									"modifiers": ["private"],
 								},
-								"match": "_(.+)"
+								"match": "_(.+)",
 								// Formats omitted on purpose to fall through
 							},
 							{
 								"selector": {
-									"kind": "enum"
+									"kind": "enum",
 								},
 								"formats": ["PascalCase"],
-								"match": "(.{2,}s)"
+								"match": "(.{2,}s)",
 							},
 							{
 								"selector": {
-									"kind": "enumMember"
+									"kind": "enumMember",
 								},
-								"formats": ["CONSTANT_CASE", "PascalCase"]
+								"formats": ["CONSTANT_CASE", "PascalCase"],
 							},
 							{
 								"selector": {
 									"kind": "const",
-									"scope": "global"
+									"scope": "global",
 								},
 								"match": "__(.+)__|_(.+)|(.+)",
-								"formats": ["CONSTANT_CASE", "PascalCase", "camelCase"]
+								"formats": ["CONSTANT_CASE", "PascalCase", "camelCase"],
 							},
 							{
-								"match": "(.{2,})"
-							}
-						]
-					}
+								"match": "(.{2,})",
+							},
+						],
+					},
 				},
 				"useNodeAssertStrict": "warn",
 				"useNumberNamespace": "error",
-				"useSelfClosingElements": "error",
-				"useShorthandAssign": "warn",
-				"useSingleVarDeclarator": "info",
-				"useThrowNewError": "warn",
-				"useThrowOnlyError": "error",
-				"useTrimStartEnd": "error",
-				"useGroupedAccessorPairs": "warn",
-				"useConsistentObjectDefinitions": {
-					"level": "warn",
-					"options": {
-						"syntax": "shorthand"
-					}
-				},
 				"useNumericSeparators": "info",
 				"useObjectSpread": "warn",
+				"useReactFunctionComponents": "warn",
 				"useReadonlyClassProperties": {
 					"level": "warn",
 					"options": {
-						"checkAllProperties": false
-					}
+						"checkAllProperties": false,
+					},
 				},
+				"useSelfClosingElements": "error",
+				"useShorthandAssign": "warn",
+				"useSingleVarDeclarator": "info",
+				"useSpreadOverApply": "error",
+				"useThrowNewError": "warn",
+				"useThrowOnlyError": "error",
+				"useTrimStartEnd": "error",
 				"useUnifiedTypeSignatures": "warn",
-				"useConsistentTypeDefinitions": {
-					"level": "warn",
-					"options": {
-						"style": "type"
-					}
-				},
-				"useReactFunctionComponents": "warn"
 			},
 			"suspicious": {
 				"noApproximativeNumericConstant": "error",
@@ -280,67 +301,78 @@
 				"noCompareNegZero": "error",
 				"noConfusingVoidType": "warn",
 				"noConsole": "warn",
+				"noConstantBinaryExpressions": "info",
+				"noDuplicatedSpreadProps": "warn",
+				"noDuplicateEnumValues": "error",
 				"noEmptyBlock": "warn",
 				"noEmptyBlockStatements": "error",
 				"noExplicitAny": "warn",
+				"noForIn": "info",
+				"noFunctionAssign": "error",
 				"noGlobalIsNan": "warn",
+				"noImportCycles": "error",
+				"noLeakedRender": "warn",
 				"noMisplacedAssertion": "off",
-				"useAwait": "error",
-				"useErrorMessage": "warn",
-				"useNumberToFixedDigitsArgument": "warn",
-				"noConstantBinaryExpressions": "info",
+				"noNestedPromises": "error",
+				"noNonNullAssertedOptionalChain": "warn",
+				"noParametersOnlyUsedInRecursion": "error",
+				"noReturnAssign": "error",
+				"noShadow": "warn",
 				"noTsIgnore": "error",
 				"noUnassignedVariables": "warn",
+				"noUnknownAttribute": "warn",
 				"noUselessEscapeInString": "warn",
 				"noUselessRegexBackrefs": "error",
-				"useStaticResponseMethods": "warn",
+				"useAwait": "error",
+				"useErrorMessage": "warn",
 				"useIterableCallbackReturn": "warn",
-				"noNonNullAssertedOptionalChain": "warn",
-				"noImportCycles": "error"
+				"useNumberToFixedDigitsArgument": "warn",
+				"useStaticResponseMethods": "warn",
 			},
 			// These are rules that are not yet stable and may change at any point.
 			// We'll use it as a way to keep track of interesting rules we may want to use in the future.
 			// Turn them on to the correct level before running `biome migrate` so they aren't off (comments are lost on migration)
 			"nursery": {
-				"noFloatingPromises": "error", //"warn",
-				"noMisusedPromises": "off", //"error"
-				"noShadow": "off", //"warn",
+				"noBaseToString": "off", //"warn",
+				"noFloatingPromises": "off", //"warn",
+				"noIdenticalTestTitle": "off", //"error",
+				"noMisleadingReturnType": "off", //"error",
+				"noMisusedPromises": "off", //"error",
+				"noRestrictedDependencies": "off", //"warn",
+				"noUndeclaredClasses": "off", //"error",
+				"noUnsafePlusOperands": "off", //"error",
+				"noUnusedClasses": "off", //"warn",
+				"noUselessTypeConversion": "off", //"warn",
+				"useAwaitThenable": "off", //"error",
+				"useConsistentTestIt": "off", //"error",
 				"useExhaustiveSwitchCases": "off", //"warn",
 				"useExplicitType": "off", //"warn",
+				"useIncludes": "off", //"warn",
+				"useReactFunctionComponentDefinition": "off", //"warn",
+				"useRegexpTest": "off", //"warn",
 				"useSortedClasses": {
 					"level": "off", //"warn",
 					"options": {
 						"attributes": ["classList"],
-						"functions": []
-					}
+						"functions": [],
+					},
 				},
-				"noMisleadingReturnType": "off", //"error"
-				"noBaseToString": "off", //"warn"
-				"noUselessReturn": "off", //"warn",
-				"noDuplicateEnumValues": "off", //"error",
-				"noUselessTypeConversion": "off", //"warn",
-				"useAwaitThenable": "off", //"error",
-				"useConsistentEnumValueType": "off", //"warn",
-				"useRegexpTest": "off", //"warn",
-				"useConsistentTestIt": "off", //"error",
-				"useConsistentMethodSignatures": "off", //"error",
-				"noIdenticalTestTitle": "off", //"error",
+				"useSvelteRequireEachKey": "off", //"error",
 				"useTestHooksInOrder": "off", //"error",
 				"useTestHooksOnTop": "off", //"error",
-				"noUnsafePlusOperands": "off", //"error",
 			},
 			"a11y": {
-				"noNoninteractiveElementInteractions": "error"
+				"noNoninteractiveElementInteractions": "error",
 			},
 			"security": {
 				"noSecrets": {
 					"level": "error",
 					"options": {
-						"entropyThreshold": 55
-					}
-				}
-			}
-		}
+						"entropyThreshold": 55,
+					},
+				},
+			},
+		},
 	},
 	"overrides": [
 		{
@@ -349,11 +381,11 @@
 			"linter": {
 				"rules": {
 					"style": {
-						"useImportType": "off"
-					}
-				}
-			}
-		}
+						"useImportType": "off",
+					},
+				},
+			},
+		},
 	],
 	"javascript": {
 		"formatter": {
@@ -361,7 +393,7 @@
 			"bracketSameLine": false,
 			"bracketSpacing": true,
 			"semicolons": "always",
-			"trailingCommas": "all"
+			"trailingCommas": "all",
 		},
 		"globals": [
 			"_",
@@ -371,27 +403,27 @@
 			"beforeEach",
 			"afterEach",
 			"beforeAll",
-			"afterAll"
+			"afterAll",
 		],
 		"parser": {
-			"unsafeParameterDecoratorsEnabled": true
-		}
+			"unsafeParameterDecoratorsEnabled": true,
+		},
 	},
 	"json": {
 		"formatter": {
 			"enabled": true,
 			"expand": "auto",
-			"trailingCommas": "none"
+			"trailingCommas": "none",
 		},
 		"parser": {
 			"allowComments": true,
-			"allowTrailingCommas": true
-		}
+			"allowTrailingCommas": true,
+		},
 	},
 	"vcs": {
 		"enabled": true,
 		"useIgnoreFile": true,
 		"clientKind": "git",
-		"root": "./"
-	}
+		"root": "./",
+	},
 }
