@@ -77,12 +77,52 @@ echo "context" | qq -b claude
 echo "context" | qq -b
 ```
 
-Generate shell completion scripts with one of these commands, then source or redirect the output for your shell:
+Generate shell completion scripts with one of these commands:
 
 ```bash
 qq completion bash
 qq completion zsh
 qq completion fish
+qq completion powershell
+```
+
+Load completions dynamically from your shell startup file:
+
+```bash
+# bash: ~/.bashrc
+[ -n "$(command -v qq)" ] && source <(qq completion bash)
+```
+
+```zsh
+# zsh: ~/.zshrc, before plugins that wrap completion such as zsh-autocomplete
+[ -n "$(command -v qq)" ] && source <(qq completion zsh)
+```
+
+```fish
+# fish: ~/.config/fish/config.fish
+type -q qq; and qq completion fish | source
+```
+
+```powershell
+# PowerShell: $PROFILE
+if (Get-Command qq -ErrorAction SilentlyContinue) {
+    qq completion powershell | Out-String | Invoke-Expression
+}
+```
+
+For static fish completions:
+
+```fish
+mkdir -p ~/.config/fish/completions
+qq completion fish > ~/.config/fish/completions/qq.fish
+```
+
+If zsh still completes paths after provider flags, clear its completion cache
+and restart:
+
+```zsh
+rm -f "${ZSH:-$HOME/.oh-my-zsh}/cache/.zcompdump-$HOST"
+exec zsh
 ```
 
 ## Development

@@ -209,7 +209,7 @@ equivalent in this contract, so `qq` does not claim to disable Cursor skills.
 11. No Python files are used by this tool.
 12. Provider flags select backends, open the selector when required, and reject unsupported explicit backends when prompt context exists.
 13. Args-only invocations do not block on open or partially-filled stdin pipes.
-14. Shell completion generates scripts for `bash`, `zsh`, and `fish`; provider flags complete to supported backend names.
+14. Shell completion generates scripts for `bash`, `zsh`, `fish`, and `powershell`; provider flags complete to supported backend names.
 
 ## Testing
 
@@ -280,6 +280,7 @@ Generate completion scripts:
 qq completion bash
 qq completion zsh
 qq completion fish
+qq completion powershell
 ```
 
 Source or redirect the output for your shell. Provider/backend flags complete to the supported backend list with `ShellCompDirectiveNoFileComp`.

@@ -28,10 +28,10 @@ func mustRegisterBackendCompletion(cmd *cobra.Command, flagName string) {
 
 func newCompletionCommand() *cobra.Command {
 	return &cobra.Command{
-		Use:                   "completion [bash|zsh|fish]",
+		Use:                   "completion [bash|zsh|fish|powershell]",
 		Short:                 "Generate shell completion script",
 		DisableFlagsInUseLine: true,
-		ValidArgs:             []string{"bash", "zsh", "fish"},
+		ValidArgs:             []string{"bash", "zsh", "fish", "powershell"},
 		Args:                  cobra.MatchAll(cobra.ExactArgs(1), cobra.OnlyValidArgs),
 		RunE: func(cmd *cobra.Command, args []string) error {
 			root := cmd.Root()
@@ -42,6 +42,8 @@ func newCompletionCommand() *cobra.Command {
 				return root.GenZshCompletion(cmd.OutOrStdout())
 			case "fish":
 				return root.GenFishCompletion(cmd.OutOrStdout(), true)
+			case "powershell":
+				return root.GenPowerShellCompletionWithDesc(cmd.OutOrStdout())
 			default:
 				return fmt.Errorf("unsupported shell: %s", args[0])
 			}

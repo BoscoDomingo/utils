@@ -11,6 +11,7 @@ const selectorFlagValue = "__qq_select_backend__"
 // New builds the root Cobra command around the provided application.
 func New(qqApp *appcore.App, args []string) *cobra.Command {
 	rawArgs := append([]string(nil), args...)
+	completionRequest := isShellCompletionRequest(args)
 
 	cmd := &cobra.Command{
 		Use:           "qq [flags] [prompt]",
@@ -26,8 +27,9 @@ func New(qqApp *appcore.App, args []string) *cobra.Command {
 	cmd.CompletionOptions.HiddenDefaultCmd = true
 	cmd.ValidArgsFunction = noFileCompletion
 
-	addBackendFlag(cmd, "backend", "b")
-	addBackendFlag(cmd, "provider", "p")
+	// Cobra skips flag value completion when NoOptDefVal makes the flag value optional.
+	addBackendFlag(cmd, "backend", "b", !completionRequest)
+	addBackendFlag(cmd, "provider", "p", !completionRequest)
 
 	if len(args) > 0 && args[0] == "completion" {
 		cmd.AddCommand(newCompletionCommand())
@@ -36,10 +38,25 @@ func New(qqApp *appcore.App, args []string) *cobra.Command {
 	return cmd
 }
 
-func addBackendFlag(cmd *cobra.Command, name string, shorthand string) {
+func addBackendFlag(cmd *cobra.Command, name string, shorthand string, optionalValue bool) {
 	cmd.Flags().StringP(name, shorthand, "", "backend/provider to use; omit value to choose")
-	markFlagOptional(cmd, name)
+	if optionalValue {
+		markFlagOptional(cmd, name)
+	}
 	mustRegisterBackendCompletion(cmd, name)
+}
+
+func isShellCompletionRequest(args []string) bool {
+	if len(args) == 0 {
+		return false
+	}
+
+	switch args[0] {
+	case "__complete", "__completeNoDesc":
+		return true
+	default:
+		return false
+	}
 }
 
 func markFlagOptional(cmd *cobra.Command, name string) {
