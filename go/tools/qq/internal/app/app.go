@@ -53,7 +53,11 @@ func (app *App) Run(ctx context.Context, args []string) error {
 		)
 	}
 
-	spec, ok := backend.CommandForBackend(backendName, invocationResult.Prompt)
+	spec, ok := backend.CommandForBackend(
+		backendName,
+		invocationResult.Prompt,
+		modelInfo(invocationResult.Model),
+	)
 	if !ok {
 		return app.printError(ExitBackendUnavailable, fmt.Sprintf("Unsupported backend: %s", backendName))
 	}
@@ -92,8 +96,8 @@ func (app *App) selectBackend(ctx context.Context) (string, error) {
 
 func (app *App) firstInstalledBackend() (string, error) {
 	for _, item := range backend.Supported() {
-		if _, err := app.lookPath(item.Name); err == nil {
-			return item.Name, nil
+		if _, err := app.lookPath(item.Name()); err == nil {
+			return item.Name(), nil
 		}
 	}
 
@@ -103,9 +107,16 @@ func (app *App) firstInstalledBackend() (string, error) {
 func (app *App) installedBackends() []backend.Backend {
 	var installed []backend.Backend
 	for _, item := range backend.Supported() {
-		if _, err := app.lookPath(item.Name); err == nil {
+		if _, err := app.lookPath(item.Name()); err == nil {
 			installed = append(installed, item)
 		}
 	}
 	return installed
+}
+
+func modelInfo(selector string) *backend.LLMInfo {
+	if selector == "" {
+		return nil
+	}
+	return &backend.LLMInfo{Raw: selector}
 }

@@ -6,7 +6,7 @@ import (
 )
 
 func testSupportsBackend(name string) bool {
-	for _, supported := range []string{"opencode", "pi", "claude", "copilot", "gemini", "qwen"} {
+	for _, supported := range []string{"opencode", "pi", "codex", "claude", "agent", "gemini"} {
 		if name == supported {
 			return true
 		}

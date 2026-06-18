@@ -9,6 +9,7 @@ import (
 type Result struct {
 	BackendName   string
 	NeedsSelector bool
+	Model         string
 	Prompt        string
 }
 
@@ -19,11 +20,31 @@ func Parse(
 	isSupportedBackend func(string) bool,
 ) (Result, error) {
 	var backendName string
+	var model string
 	var promptArgs []string
 	needsSelector := false
 
 	for index := 0; index < len(args); index++ {
 		arg := args[index]
+
+		if value, ok := splitModelFlag(arg); ok {
+			if value == nil {
+				if index+1 >= len(args) {
+					return Result{}, errors.New("missing model value")
+				}
+				model = args[index+1]
+				if model == "" {
+					return Result{}, errors.New("missing model value")
+				}
+				index++
+				continue
+			}
+			if *value == "" {
+				return Result{}, errors.New("missing model value")
+			}
+			model = *value
+			continue
+		}
 
 		if value, ok := splitBackendFlag(arg); ok {
 			if value != nil {
@@ -83,7 +104,22 @@ func Parse(
 		return Result{}, errors.New(usageText())
 	}
 
-	return Result{BackendName: backendName, NeedsSelector: needsSelector, Prompt: prompt}, nil
+	return Result{BackendName: backendName, NeedsSelector: needsSelector, Model: model, Prompt: prompt}, nil
+}
+
+func splitModelFlag(arg string) (*string, bool) {
+	const prefix = "--model="
+	if strings.HasPrefix(arg, prefix) {
+		value := strings.TrimPrefix(arg, prefix)
+		return &value, true
+	}
+
+	switch arg {
+	case "-m", "--model":
+		return nil, true
+	default:
+		return nil, false
+	}
 }
 
 func splitBackendFlag(arg string) (*string, bool) {

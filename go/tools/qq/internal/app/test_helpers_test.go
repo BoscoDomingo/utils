@@ -109,7 +109,7 @@ func (selector *fakeSelector) Select(_ context.Context, backends []backend.Backe
 	if len(backends) == 0 {
 		return "", errors.New("no backends to select")
 	}
-	return backends[0].Name, nil
+	return backends[0].Name(), nil
 }
 
 func fakeLookPath(installed []string) func(string) (string, error) {

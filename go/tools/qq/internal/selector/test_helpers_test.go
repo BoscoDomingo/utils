@@ -26,10 +26,8 @@ func assertQuitCommand(t *testing.T, cmd tea.Cmd) {
 }
 
 func testBackends() []backend.Backend {
-	return []backend.Backend{
-		{Name: "opencode"},
-		{Name: "qwen"},
-	}
+	backends := backend.Supported()
+	return backends[:2]
 }
 
 func assertEqual[T comparable](t *testing.T, actual T, expected T) {

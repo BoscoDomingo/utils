@@ -17,10 +17,17 @@ func mustRegisterBackendCompletion(cmd *cobra.Command, flagName string) {
 		backends := backend.Supported()
 		completions := make([]cobra.Completion, len(backends))
 		for index, item := range backends {
-			completions[index] = cobra.CompletionWithDesc(item.Name, "qq backend")
+			completions[index] = cobra.CompletionWithDesc(item.Name(), "qq backend")
 		}
 		return completions, cobra.ShellCompDirectiveNoFileComp
 	})
+	if err != nil {
+		panic(err)
+	}
+}
+
+func mustRegisterNoFileFlagCompletion(cmd *cobra.Command, flagName string) {
+	err := cmd.RegisterFlagCompletionFunc(flagName, noFileCompletion)
 	if err != nil {
 		panic(err)
 	}

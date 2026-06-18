@@ -78,20 +78,20 @@ func TestE2EDefaultClaudeUsesSafeMode(t *testing.T) {
 func TestE2EExplicitBackend(t *testing.T) {
 	t.Parallel()
 
-	harness := newE2EHarness(t, []string{"opencode", "qwen"})
+	harness := newE2EHarness(t, []string{"opencode", "gemini"})
 
-	result := harness.run(t, []string{"-b", "qwen", "hello"}, nil)
+	result := harness.run(t, []string{"-b", "gemini", "hello"}, nil)
 
 	assertExitStatus(t, result, 0)
-	assertEqual(t, result.stdout, "fake stdout from qwen\n")
-	assertStringSlicesEqual(t, harness.argv(t, "qwen"), []string{"-p", "hello"})
+	assertEqual(t, result.stdout, "fake stdout from gemini\n")
+	assertStringSlicesEqual(t, harness.argv(t, "gemini"), []string{"-p", "hello"})
 	assertEqual(t, harness.backendRan("opencode"), false)
 }
 
 func TestE2EPriorityFallsThroughMissingBinaries(t *testing.T) {
 	t.Parallel()
 
-	harness := newE2EHarness(t, []string{"pi", "q"})
+	harness := newE2EHarness(t, []string{"pi", "gemini"})
 
 	result := harness.run(t, []string{"hello"}, nil)
 
@@ -100,9 +100,21 @@ func TestE2EPriorityFallsThroughMissingBinaries(t *testing.T) {
 	assertStringSlicesEqual(
 		t,
 		harness.argv(t, "pi"),
-		[]string{"--model", "github-copilot/gpt-5.5", "-p", "hello"},
+		[]string{"-p", "hello"},
 	)
-	assertEqual(t, harness.backendRan("q"), false)
+	assertEqual(t, harness.backendRan("gemini"), false)
+}
+
+func TestE2EExplicitModelOverrideReachesBackend(t *testing.T) {
+	t.Parallel()
+
+	harness := newE2EHarness(t, []string{"pi"})
+	model := "github-copilot/gpt-5.5"
+
+	result := harness.run(t, []string{"-b", "pi", "-m", model, "hi"}, nil)
+
+	assertExitStatus(t, result, 0)
+	assertStringSlicesEqual(t, harness.argv(t, "pi"), []string{"--model", model, "-p", "hi"})
 }
 
 func TestE2EBackendFailurePassthrough(t *testing.T) {
@@ -138,7 +150,7 @@ func TestE2ENoBackendError(t *testing.T) {
 	assertEqual(t, result.stdout, "")
 	assertContains(t, result.stderr, "No supported backend found")
 	assertContains(t, result.stderr, "opencode")
-	assertContains(t, result.stderr, "roo")
+	assertContains(t, result.stderr, "gemini")
 }
 
 func TestE2EStdoutStderrPassthrough(t *testing.T) {

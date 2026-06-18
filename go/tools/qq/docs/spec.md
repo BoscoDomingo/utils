@@ -38,10 +38,10 @@ echo "context" | qq "summarize this"
 Design intent:
 
 - Quick Q&A, not editing. Prefer safe/read-only/ask modes where a backend supports them.
-- Fixed backend priority list for v1; no user config file.
+- Fixed first-class backend set and priority list for v1; no user config file.
 - Piping must work. The wrapper reads stdin and merges it into the final prompt.
 - Success output is backend stdout only. Wrapper diagnostics go to stderr.
-- Name is `qq`, not `q`, to avoid colliding with Amazon Q Developer CLI's `q` binary while still supporting `q` as a backend.
+- Name is `qq`, not `q`, to avoid colliding with Amazon Q Developer CLI's `q` binary.
 
 ## Architecture
 
@@ -65,7 +65,7 @@ Dependencies:
 
 Implementation uses `exec.Command` with argv slices. Prompts are never passed through shell string interpolation or `eval`.
 Backend-specific environment overrides are set only when listed in
-[`internal/backend/backend.go`](internal/backend/backend.go).
+[`internal/backend/backend.go`](../internal/backend/backend.go).
 
 ## Product decisions
 
@@ -75,12 +75,13 @@ Backend-specific environment overrides are set only when listed in
 | Distribution                | `go install github.com/BoscoDomingo/utils/go/tools/qq@latest` or `go install .` locally  |
 | Default backend selection   | First installed backend from fixed priority order                                        |
 | Explicit backend            | `-b`, `--backend`, `-p`, `--provider` flags                                              |
+| Explicit model selector     | `--model`, `-m` flags pass the exact selector string to the selected backend              |
 | Selector fallback           | When a provider flag is present but no backend value resolves, open interactive selector |
 | Success output              | Silent about backend choice; no wrapper banners on stdout                                |
 | Fallback on missing binary  | Try next backend only when `LookPath` fails for the executable name                      |
 | Fallback on backend failure | None. Installed backend non-zero exits stop immediately                                  |
 | Prompt merge separator      | Args, blank line, `Context:`, blank line, stdin                                          |
-| Amazon Q                    | Included as first Tier 2 backend: `q chat --non-interactive`                             |
+| First-class backends        | Claude, Cursor Agent, OpenCode, Pi, Codex, and Gemini                                   |
 | Python                      | Not used by this tool                                                                    |
 
 ## CLI behavior
@@ -100,11 +101,24 @@ Supported flag names (equivalent):
 Examples:
 
 ```bash
-qq -b copilot "hey, what's up"
+qq -b pi "hey, what's up"
 qq -p claude "hey"
-qq --backend qwen "hey"
+qq --backend agent "hey"
 qq --provider opencode "hey"
 ```
+
+### Model selection
+
+`qq --model <selector>` and `qq -m <selector>` pass the exact selector string to
+the selected backend using that backend's native model flag:
+
+```bash
+qq -b pi -m github-copilot/gpt-5.5 "reply with OK"
+qq --provider claude --model claude-sonnet-4 "explain this command"
+```
+
+If no model flag is supplied, `qq` passes no model argument. Backend-native
+defaults remain responsible for model choice.
 
 ### Selector fallback
 
@@ -131,7 +145,7 @@ Prompt context examples:
 ```bash
 echo "hello" | qq -b claude    # backend=claude, prompt from stdin
 echo "hello" | qq -b           # selector required; stdin is prompt if selector succeeds
-qq -b copilot "review this"    # backend=copilot, prompt="review this"
+qq -b pi "review this"         # backend=pi, prompt="review this"
 ```
 
 ### Interactive selector
@@ -180,7 +194,7 @@ Args-only invocations must never hang waiting for stdin.
 
 ## Backend priority and command mapping
 
-Authoritative source: [`internal/backend/backend.go`](internal/backend/backend.go)
+Authoritative source: [`internal/backend/backend.go`](../internal/backend/backend.go)
 (`supportedBackends`).
 
 Backend priority, argv templates, and backend-specific environment overrides are
@@ -208,14 +222,15 @@ equivalent in this contract, so `qq` does not claim to disable Cursor skills.
 10. Success output does not include wrapper banners, backend names, or progress text from the wrapper.
 11. No Python files are used by this tool.
 12. Provider flags select backends, open the selector when required, and reject unsupported explicit backends when prompt context exists.
-13. Args-only invocations do not block on open or partially-filled stdin pipes.
-14. Shell completion generates scripts for `bash`, `zsh`, `fish`, and `powershell`; provider flags complete to supported backend names.
+13. `--model` and `-m` pass the exact selector string to the chosen backend; no model flag means no model argv.
+14. Args-only invocations do not block on open or partially-filled stdin pipes.
+15. Shell completion generates scripts for `bash`, `zsh`, `fish`, and `powershell`; provider flags complete to supported backend names and the model flag avoids file completion.
 
 ## Testing
 
 Primary tests are Go tests split by scope:
 
-- root E2E tests in [`qq_e2e_test.go`](qq_e2e_test.go) run the real `qq` binary
+- root E2E tests in [`e2e_test.go`](../e2e_test.go) run the real `qq` binary
   against fake backend executables under `testdata`
 - optional real-backend smoke E2E tests run installed backend CLIs only when
   `QQ_REAL_BACKEND_E2E=1` is set
@@ -236,11 +251,11 @@ Harness:
 
 Coverage includes:
 
-- Full priority order (each backend beats all lower-priority installed backends)
-- `q` before lower Tier 2 backends when Tier 1 is absent
+- Full priority order across the first-class backend set
+- Model override argv rendering, including no model argv when no override is supplied
 - Args-only, stdin-only, and args+stdin prompt merge with exact `Context:` separator
 - Shell metacharacters passed literally (no shell execution side effects)
-- Missing-command fallback only; non-zero backend stops without fallback (including `q`)
+- Missing-command fallback only; non-zero backend stops without fallback
 - Provider flag parser semantics and unsupported-backend errors
 - Optional stdin non-blocking behavior (open pipe, partial pipe with writer held open)
 - Completion registration for provider/backend flags
@@ -263,10 +278,10 @@ Optional manual checks:
 
 - **Stdin blocking**: Never read stdin unconditionally. Distinguish TTY, required, and optional modes.
 - **Partial pipes**: `POLLIN` alone is not enough for optional reads; wait for EOF signals before `ReadAll`.
-- **Amazon Q**: Missing-command checks `q` only. If `q` exists but `q chat --non-interactive` fails (auth, config), v1 stops on that failure.
+- **Model overrides**: `--model` and `-m` pass exact selector strings; no-override paths must not hard-code defaults.
 - **Prompt safety**: Pass prompt as argv; never interpolate into shell strings.
 - **stderr passthrough**: Do not suppress backend stderr unless the backend flag does.
-- **Edit-oriented CLIs**: `aider` and similar backends stay lower priority; use only documented non-interactive flags.
+- **Long-tail CLIs**: Backends outside the first-class set are not supported by v1.
 - **Large stdin**: Read into memory in v1; not intended for huge files.
 - **Selector vs stdin**: Bubble Tea must use `/dev/tty`, not fd 0, so piped prompts remain available.
 - **Completion vs runtime**: Completion may suggest backends even when runtime will treat the next token as a prompt; tests lock the resolution rules.
@@ -283,10 +298,12 @@ qq completion fish
 qq completion powershell
 ```
 
-Source or redirect the output for your shell. Provider/backend flags complete to the supported backend list with `ShellCompDirectiveNoFileComp`.
+Source or redirect the output for your shell. Provider/backend flags complete to
+the supported backend list with `ShellCompDirectiveNoFileComp`; the model flag is
+registered but does not enumerate model values.
 
 ## Related docs
 
-- Usage and install quick start: [`README.md`](README.md)
-- Historical implementation plan: [`docs/plans/2026-06-17-qq-agent-cli-wrapper.md`](docs/plans/2026-06-17-qq-agent-cli-wrapper.md)
-- Repo conventions: [`AGENTS.md`](../../../AGENTS.md)
+- Usage and install quick start: [`README.md`](../README.md)
+- Historical implementation plan: [`docs/plans/2026-06-17-qq-agent-cli-wrapper.md`](plans/2026-06-17-qq-agent-cli-wrapper.md)
+- Repo conventions: [`AGENTS.md`](../../../../AGENTS.md)

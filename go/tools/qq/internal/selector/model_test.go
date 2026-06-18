@@ -50,11 +50,11 @@ func TestModelCancelKeysCancelSelection(t *testing.T) {
 }
 
 func TestItemTextMatchesBackend(t *testing.T) {
-	item := backendItem{Name: "qwen"}
+	item := backendItem{name: "gemini"}
 
-	assertEqual(t, item.Title(), "qwen")
-	assertEqual(t, item.Description(), "Run with qwen")
-	assertEqual(t, item.FilterValue(), "qwen")
+	assertEqual(t, item.Title(), "gemini")
+	assertEqual(t, item.Description(), "Run with gemini")
+	assertEqual(t, item.FilterValue(), "gemini")
 }
 
 func TestModelViewIncludesTitle(t *testing.T) {

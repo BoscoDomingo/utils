@@ -34,6 +34,22 @@ func TestBackendFlagCompletionSuggestions(t *testing.T) {
 	}
 }
 
+func TestBackendFlagCompletionUsesSupportedBackendList(t *testing.T) {
+	t.Parallel()
+
+	app := newTestCommandApp(t, nil)
+
+	result := app.execute(context.Background(), "__completeNoDesc", "--backend", "")
+
+	assertExitCode(t, result, 0)
+	assertEqual(
+		t,
+		strings.Join(completionItems(result.stdout), "\n"),
+		"opencode\npi\ncodex\nclaude\nagent\ngemini",
+	)
+	assertContains(t, result.stdout, ":4")
+}
+
 func TestFlagNameCompletionAfterDash(t *testing.T) {
 	t.Parallel()
 
@@ -45,6 +61,8 @@ func TestFlagNameCompletionAfterDash(t *testing.T) {
 	assertContains(t, result.stdout, "-b")
 	assertContains(t, result.stdout, "--provider")
 	assertContains(t, result.stdout, "-p")
+	assertContains(t, result.stdout, "--model")
+	assertContains(t, result.stdout, "-m")
 	assertContains(t, result.stdout, ":4")
 }
 
@@ -73,6 +91,31 @@ func TestBackendFlagsUseSelectorSentinelNoOptDefault(t *testing.T) {
 	}
 }
 
+func TestModelFlagIsRegistered(t *testing.T) {
+	t.Parallel()
+
+	cmd := New(newTestCommandApp(t, nil).app, nil)
+
+	flag := cmd.Flags().Lookup("model")
+	if flag == nil {
+		t.Fatal("missing model flag")
+	}
+	assertEqual(t, flag.Shorthand, "m")
+	assertEqual(t, flag.NoOptDefVal, "")
+}
+
+func TestModelFlagValueCompletionDisablesFileCompletion(t *testing.T) {
+	t.Parallel()
+
+	app := newTestCommandApp(t, nil)
+
+	result := app.execute(context.Background(), "__complete", "--model", "")
+
+	assertExitCode(t, result, 0)
+	assertEqual(t, strings.Join(completionItems(result.stdout), "\n"), "")
+	assertContains(t, result.stdout, ":4")
+}
+
 func TestCompletionCommandsGenerateShellScripts(t *testing.T) {
 	t.Parallel()
 
@@ -89,4 +132,17 @@ func TestCompletionCommandsGenerateShellScripts(t *testing.T) {
 			assertContains(t, result.stdout, "qq")
 		})
 	}
+}
+
+func completionItems(output string) []string {
+	lines := strings.Split(output, "\n")
+	items := make([]string, 0, len(lines))
+	for _, line := range lines {
+		if line == "" || strings.HasPrefix(line, ":") {
+			continue
+		}
+		item, _, _ := strings.Cut(line, "\t")
+		items = append(items, item)
+	}
+	return items
 }

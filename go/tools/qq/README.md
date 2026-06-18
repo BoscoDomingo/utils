@@ -14,7 +14,7 @@ $ echo "hi there! how do I remove a directory from my home directory?" | qq
 rm -rf ~/directory
 ```
 
-See [`spec.md`](spec.md) for the full behavior and architecture spec.
+See [`docs/spec.md`](docs/spec.md) for the full behavior and architecture spec.
 
 ## The "quick-and-dirty" alternative (and why this exists)
 
@@ -63,13 +63,23 @@ Examples:
 ```bash
 qq "how do I untar a file?"
 echo "context" | qq "summarize this"
-qq -b copilot "review this error"
-qq --provider claude "explain this command"
+qq -b pi "review this error"
+qq --provider claude --model claude-sonnet-4 "explain this command"
+qq -b pi -m github-copilot/gpt-5.5 "reply with OK"
 ```
 
-Use `-b`, `--backend`, `-p`, or `--provider` to select a backend. If the flag is
-present without a backend value, `qq` opens an interactive selector on
-`/dev/tty`, so piped stdin can still provide the prompt:
+First-class backends are `claude`, `agent` (Cursor Agent), `opencode`, `pi`,
+`codex`, and `gemini`. Backend priority and argv mappings live in
+[`internal/backend/backend.go`](internal/backend/backend.go); treat that source
+as authoritative when behavior and docs differ.
+
+Use `-b`, `--backend`, `-p`, or `--provider` to select a backend. Use `--model`
+or `-m` to pass an exact model selector through to the selected backend. When no
+model is supplied, `qq` sends no model argument and lets the backend use its own
+default.
+
+If the backend flag is present without a backend value, `qq` opens an
+interactive selector on `/dev/tty`, so piped stdin can still provide the prompt:
 
 ```bash
 qq -b "choose interactively for this prompt"
@@ -163,4 +173,4 @@ QQ_REAL_BACKEND_E2E=1 go test -run TestE2ERealBackendsReturnExpectedFormat
 The interactive selector uses Charm v2 modules:
 [`charm.land/bubbletea/v2`](https://pkg.go.dev/charm.land/bubbletea/v2) and
 [`charm.land/bubbles/v2`](https://pkg.go.dev/charm.land/bubbles/v2).
-[`spec.md`](spec.md) remains the canonical behavior spec.
+[`docs/spec.md`](docs/spec.md) remains the canonical behavior spec.

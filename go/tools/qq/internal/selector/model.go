@@ -38,7 +38,7 @@ func (model selectorModel) Update(msg tea.Msg) (tea.Model, tea.Cmd) {
 		case "enter":
 			item, ok := model.list.SelectedItem().(backendItem)
 			if ok {
-				model.selected = item.Name
+				model.selected = item.name
 			}
 			return model, tea.Quit
 		case "esc", "q", "ctrl+c":

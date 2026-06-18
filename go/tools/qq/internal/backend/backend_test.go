@@ -11,52 +11,116 @@ import (
 	"testing"
 )
 
-func TestSupportedBackendsKeepPriorityAndArgvTemplates(t *testing.T) {
+func TestSupportedBackendsKeepPriorityAndDefaultArgv(t *testing.T) {
 	t.Parallel()
 
-	expected := []Backend{
+	prompt := "hello"
+	expected := []backendExpectation{
 		{
-			Name: "opencode",
-			Args: []string{"run", promptPlaceholder},
-			Env:  []string{"OPENCODE_DISABLE_EXTERNAL_SKILLS=1"},
+			name: "opencode",
+			args: []string{"run", prompt},
+			env:  []string{"OPENCODE_DISABLE_EXTERNAL_SKILLS=1"},
 		},
-		{Name: "pi", Args: []string{"--model", piDefaultModel, "-p", promptPlaceholder}},
-		{Name: "codex", Args: []string{"exec", "--ephemeral", promptPlaceholder}},
-		{Name: "claude", Args: []string{"--safe-mode", "-p", promptPlaceholder}},
-		{Name: "agent", Args: []string{"--mode", "ask", "-p", promptPlaceholder}},
-		{Name: "copilot", Args: []string{"-sp", promptPlaceholder}},
-		{Name: "openclaw", Args: []string{"agent", "--agent", "main", "--message", promptPlaceholder}},
-		{Name: "gemini", Args: []string{"-p", promptPlaceholder}},
-		{Name: "qwen", Args: []string{"-p", promptPlaceholder}},
-		{Name: "q", Args: []string{"chat", "--non-interactive", promptPlaceholder}},
-		{Name: "kimi", Args: []string{"--quiet", "-p", promptPlaceholder}},
-		{Name: "kilo", Args: []string{"run", promptPlaceholder}},
-		{Name: "kiro-cli", Args: []string{"chat", "--no-interactive", promptPlaceholder}},
-		{Name: "goose", Args: []string{"run", "--no-session", "-t", promptPlaceholder}},
-		{Name: "aider", Args: []string{"--message", promptPlaceholder}},
-		{Name: "amp", Args: []string{"-x", promptPlaceholder}},
-		{Name: "droid", Args: []string{"exec", promptPlaceholder}},
-		{Name: "crush", Args: []string{"run", "--quiet", promptPlaceholder}},
-		{Name: "cn", Args: []string{"-p", promptPlaceholder, "--silent"}},
-		{Name: "roo", Args: []string{"--print", promptPlaceholder}},
+		{name: "pi", args: []string{"-p", prompt}},
+		{name: "codex", args: []string{"exec", "--ephemeral", prompt}},
+		{name: "claude", args: []string{"--safe-mode", "-p", prompt}},
+		{name: "agent", args: []string{"--mode", "ask", "-p", prompt}},
+		{name: "gemini", args: []string{"-p", prompt}},
 	}
 
-	assertBackendsEqual(t, Supported(), expected)
+	assertBackendsEqual(t, Supported(), expected, prompt, nil)
 }
 
-func TestSupportedReturnsCopy(t *testing.T) {
+func TestSupportedBackendsRenderModelOverrides(t *testing.T) {
 	t.Parallel()
 
-	backends := Supported()
-	backends[0].Name = "changed"
-	backends[0].Args[0] = "changed"
-	backends[0].Env[0] = "changed"
+	prompt := "literal $(echo bad)"
+	model := &LLMInfo{
+		Provider: "github-copilot",
+		ID:       "gpt-5.5",
+		Raw:      "github-copilot/gpt-5.5",
+	}
+	expected := []backendExpectation{
+		{
+			name: "opencode",
+			args: []string{"run", "--model", model.Raw, prompt},
+			env:  []string{"OPENCODE_DISABLE_EXTERNAL_SKILLS=1"},
+		},
+		{name: "pi", args: []string{"--model", model.Raw, "-p", prompt}},
+		{name: "codex", args: []string{"exec", "--ephemeral", "--model", model.Raw, prompt}},
+		{name: "claude", args: []string{"--safe-mode", "--model", model.Raw, "-p", prompt}},
+		{name: "agent", args: []string{"--mode", "ask", "--model", model.Raw, "-p", prompt}},
+		{name: "gemini", args: []string{"--model", model.Raw, "-p", prompt}},
+	}
 
-	freshBackends := Supported()
+	assertBackendsEqual(t, Supported(), expected, prompt, model)
+}
 
-	assertEqual(t, freshBackends[0].Name, "opencode")
-	assertStringSlicesEqual(t, freshBackends[0].Args, []string{"run", promptPlaceholder})
-	assertStringSlicesEqual(t, freshBackends[0].Env, []string{"OPENCODE_DISABLE_EXTERNAL_SKILLS=1"})
+func TestDefaultModelPolicy(t *testing.T) {
+	t.Parallel()
+
+	prompt := "hello"
+
+	tests := []struct {
+		name string
+		args []string
+	}{
+		{name: "opencode", args: []string{"run", prompt}},
+		{name: "pi", args: []string{"-p", prompt}},
+		{name: "codex", args: []string{"exec", "--ephemeral", prompt}},
+		{name: "claude", args: []string{"--safe-mode", "-p", prompt}},
+		{name: "agent", args: []string{"--mode", "ask", "-p", prompt}},
+		{name: "gemini", args: []string{"-p", prompt}},
+	}
+
+	for _, test := range tests {
+		test := test
+		t.Run(test.name, func(t *testing.T) {
+			t.Parallel()
+
+			spec, ok := CommandForBackend(test.name, prompt, nil)
+
+			assertEqual(t, ok, true)
+			assertStringSlicesEqual(t, spec.Args, test.args)
+		})
+	}
+}
+
+func TestNoModelOverridePassesNoModelSelector(t *testing.T) {
+	t.Parallel()
+
+	prompt := "hello"
+
+	for _, item := range Supported() {
+		item := item
+		t.Run(item.Name(), func(t *testing.T) {
+			t.Parallel()
+
+			spec, ok := CommandForBackend(item.Name(), prompt, nil)
+
+			assertEqual(t, ok, true)
+			for _, arg := range spec.Args {
+				if arg == "--model" || arg == "-m" {
+					t.Fatalf("unexpected default model selector in %#v", spec.Args)
+				}
+			}
+		})
+	}
+}
+
+func TestBackendArgsAndEnvReturnCopies(t *testing.T) {
+	t.Parallel()
+
+	backend := backendByName(t, "opencode")
+	args := backend.Args("hello", nil)
+	env := backend.Env()
+	args[0] = "changed"
+	env[0] = "changed"
+
+	freshBackend := backendByName(t, "opencode")
+
+	assertStringSlicesEqual(t, freshBackend.Args("hello", nil), []string{"run", "hello"})
+	assertStringSlicesEqual(t, freshBackend.Env(), []string{"OPENCODE_DISABLE_EXTERNAL_SKILLS=1"})
 }
 
 func TestCommandForBackendRendersPromptAsSingleArgument(t *testing.T) {
@@ -66,15 +130,15 @@ func TestCommandForBackendRendersPromptAsSingleArgument(t *testing.T) {
 
 	for _, item := range Supported() {
 		item := item
-		t.Run(item.Name, func(t *testing.T) {
+		t.Run(item.Name(), func(t *testing.T) {
 			t.Parallel()
 
-			spec, ok := CommandForBackend(item.Name, prompt)
+			spec, ok := CommandForBackend(item.Name(), prompt, nil)
 
 			assertEqual(t, ok, true)
-			assertEqual(t, spec.Name, item.Name)
-			assertStringSlicesEqual(t, spec.Args, expectedArgv(item.Args, prompt))
-			assertStringSlicesEqual(t, spec.Env, item.Env)
+			assertEqual(t, spec.Name, item.Name())
+			assertStringSlicesEqual(t, spec.Args, item.Args(prompt, nil))
+			assertStringSlicesEqual(t, spec.Env, item.Env())
 		})
 	}
 }
@@ -82,12 +146,12 @@ func TestCommandForBackendRendersPromptAsSingleArgument(t *testing.T) {
 func TestCommandForBackendReturnsCopies(t *testing.T) {
 	t.Parallel()
 
-	spec, ok := CommandForBackend("opencode", "hello")
+	spec, ok := CommandForBackend("opencode", "hello", nil)
 	assertEqual(t, ok, true)
 	spec.Args[0] = "changed"
 	spec.Env[0] = "changed"
 
-	freshSpec, ok := CommandForBackend("opencode", "hello")
+	freshSpec, ok := CommandForBackend("opencode", "hello", nil)
 
 	assertEqual(t, ok, true)
 	assertStringSlicesEqual(t, freshSpec.Args, []string{"run", "hello"})
@@ -97,7 +161,7 @@ func TestCommandForBackendReturnsCopies(t *testing.T) {
 func TestCommandForBackendRejectsUnsupportedBackend(t *testing.T) {
 	t.Parallel()
 
-	spec, ok := CommandForBackend("missing", "hello")
+	spec, ok := CommandForBackend("missing", "hello", nil)
 
 	assertEqual(t, ok, false)
 	assertEqual(t, spec.Name, "")
@@ -109,10 +173,11 @@ func TestBackendSupportHelpers(t *testing.T) {
 
 	names := SupportedNames()
 
+	assertStringSlicesEqual(t, names, []string{"opencode", "pi", "codex", "claude", "agent", "gemini"})
 	assertEqual(t, IsSupported("opencode"), true)
 	assertEqual(t, IsSupported("missing"), false)
 	assertEqual(t, names[0], "opencode")
-	assertEqual(t, names[len(names)-1], "roo")
+	assertEqual(t, names[len(names)-1], "gemini")
 	assertEqual(t, SupportedCSV(), strings.Join(append(names, "..."), ", "))
 }
 

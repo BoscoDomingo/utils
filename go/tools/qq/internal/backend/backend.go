@@ -13,13 +13,25 @@ type backendName = string
 
 const promptPlaceholder = "{prompt}"
 
-// Pi keeps sticky model state; a provider-qualified model avoids OpenAI API fallback.
-const piDefaultModel = "github-copilot/gpt-5.5"
+// LLMInfo describes the backend-specific data for a model.
+type LLMInfo struct {
+	Provider string
+	ID       string
+	Raw      string
+}
 
-type Backend struct {
-	Name backendName
-	Args []string
-	Env  []string
+type Backend interface {
+	Name() backendName
+	Args(prompt string, model *LLMInfo) []string
+	Env() []string
+}
+
+type ModelLister interface {
+	ListModels(context.Context) ([]LLMInfo, error)
+}
+
+type ModelProviderLister interface {
+	ListModelProviders(context.Context) ([]string, error)
 }
 
 type CommandSpec struct {
@@ -73,85 +85,81 @@ var backendPriority = []backendName{
 	"codex",
 	"claude",
 	"agent",
-	"copilot",
-	"openclaw",
 	"gemini",
-	"qwen",
-	"q",
-	"kimi",
-	"kilo",
-	"kiro-cli",
-	"goose",
-	"aider",
-	"amp",
-	"droid",
-	"crush",
-	"cn",
-	"roo",
 }
 
 type commandTemplate struct {
-	Args []string
-	Env  []string
+	Args          []string
+	Env           []string
+	ModelArgs     func([]string, *LLMInfo) []string
+	ModelListArgs []string
+}
+
+type commandBackend struct {
+	name     backendName
+	template commandTemplate
+}
+
+func (backend commandBackend) Name() backendName {
+	return backend.name
+}
+
+func (backend commandBackend) Args(prompt string, model *LLMInfo) []string {
+	args := renderPrompt(backend.template.Args, prompt)
+	if model == nil || model.Raw == "" || backend.template.ModelArgs == nil {
+		return args
+	}
+
+	return backend.template.ModelArgs(args, model)
+}
+
+func (backend commandBackend) Env() []string {
+	return append([]string(nil), backend.template.Env...)
 }
 
 var supportedBackends = map[backendName]commandTemplate{
 	"opencode": {
-		Args: []string{"run", promptPlaceholder},
-		Env:  []string{"OPENCODE_DISABLE_EXTERNAL_SKILLS=1"},
+		Args:          []string{"run", promptPlaceholder},
+		Env:           []string{"OPENCODE_DISABLE_EXTERNAL_SKILLS=1"},
+		ModelArgs:     insertModelArgs(1),
+		ModelListArgs: []string{"models"},
 	},
 	"pi": {
-		Args: []string{"--model", piDefaultModel, "-p", promptPlaceholder},
+		Args:          []string{"-p", promptPlaceholder},
+		ModelArgs:     insertModelArgs(0),
+		ModelListArgs: []string{"--list-models"},
 	},
-	"codex":    {Args: []string{"exec", "--ephemeral", promptPlaceholder}},
-	"claude":   {Args: []string{"--safe-mode", "-p", promptPlaceholder}},
-	"agent":    {Args: []string{"--mode", "ask", "-p", promptPlaceholder}},
-	"copilot":  {Args: []string{"-sp", promptPlaceholder}},
-	"openclaw": {Args: []string{"agent", "--agent", "main", "--message", promptPlaceholder}},
-	"gemini":   {Args: []string{"-p", promptPlaceholder}},
-	"qwen":     {Args: []string{"-p", promptPlaceholder}},
-	"q":        {Args: []string{"chat", "--non-interactive", promptPlaceholder}},
-	"kimi":     {Args: []string{"--quiet", "-p", promptPlaceholder}},
-	"kilo":     {Args: []string{"run", promptPlaceholder}},
-	"kiro-cli": {Args: []string{"chat", "--no-interactive", promptPlaceholder}},
-	"goose":    {Args: []string{"run", "--no-session", "-t", promptPlaceholder}},
-	"aider":    {Args: []string{"--message", promptPlaceholder}},
-	"amp":      {Args: []string{"-x", promptPlaceholder}},
-	"droid":    {Args: []string{"exec", promptPlaceholder}},
-	"crush":    {Args: []string{"run", "--quiet", promptPlaceholder}},
-	"cn":       {Args: []string{"-p", promptPlaceholder, "--silent"}},
-	"roo":      {Args: []string{"--print", promptPlaceholder}},
+	"codex":  {Args: []string{"exec", "--ephemeral", promptPlaceholder}, ModelArgs: insertModelArgs(2)},
+	"claude": {Args: []string{"--safe-mode", "-p", promptPlaceholder}, ModelArgs: insertModelArgs(1)},
+	"agent": {
+		Args:          []string{"--mode", "ask", "-p", promptPlaceholder},
+		ModelArgs:     insertModelArgs(2),
+		ModelListArgs: []string{"models"},
+	},
+	"gemini": {Args: []string{"-p", promptPlaceholder}, ModelArgs: insertModelArgs(0)},
 }
 
 func Supported() []Backend {
 	backends := make([]Backend, len(backendPriority))
 	for index, name := range backendPriority {
-		backends[index] = Backend{
-			Name: name,
-			Args: append([]string(nil), supportedBackends[name].Args...),
-			Env:  append([]string(nil), supportedBackends[name].Env...),
+		item := commandBackend{name: name, template: supportedBackends[name]}
+		if len(item.template.ModelListArgs) > 0 {
+			backends[index] = modelListingBackend{commandBackend: item}
+			continue
 		}
+		backends[index] = item
 	}
 	return backends
 }
 
-func CommandForBackend(backendName backendName, prompt string) (CommandSpec, bool) {
+func CommandForBackend(backendName backendName, prompt string, model *LLMInfo) (CommandSpec, bool) {
 	template, ok := supportedBackends[backendName]
 	if !ok {
 		return CommandSpec{}, false
 	}
 
-	args := make([]string, len(template.Args))
-	for index, arg := range template.Args {
-		if arg == promptPlaceholder {
-			args[index] = prompt
-			continue
-		}
-		args[index] = arg
-	}
-
-	env := append([]string(nil), template.Env...)
-	return CommandSpec{Name: backendName, Args: args, Env: env}, true
+	backend := commandBackend{name: backendName, template: template}
+	return CommandSpec{Name: backendName, Args: backend.Args(prompt, model), Env: backend.Env()}, true
 }
 
 func IsSupported(name backendName) bool {
@@ -173,4 +181,27 @@ func SupportedCSV() string {
 	parts = append(parts, "...")
 
 	return strings.Join(parts, ", ")
+}
+
+func renderPrompt(template []string, prompt string) []string {
+	args := make([]string, len(template))
+	for index, arg := range template {
+		if arg == promptPlaceholder {
+			args[index] = prompt
+			continue
+		}
+		args[index] = arg
+	}
+	return args
+}
+
+func insertModelArgs(index int) func([]string, *LLMInfo) []string {
+	return func(args []string, model *LLMInfo) []string {
+		modelArgs := []string{"--model", model.Raw}
+		result := make([]string, 0, len(args)+len(modelArgs))
+		result = append(result, args[:index]...)
+		result = append(result, modelArgs...)
+		result = append(result, args[index:]...)
+		return result
+	}
 }

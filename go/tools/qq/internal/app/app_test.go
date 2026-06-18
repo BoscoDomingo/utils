@@ -110,17 +110,17 @@ func TestSelectorRequiredWithoutTTYFailsBeforeBackendRun(t *testing.T) {
 func TestSelectorUsesInjectedBackendWithPipedPrompt(t *testing.T) {
 	t.Parallel()
 
-	app := newTestApp(t, []string{"claude", "qwen"})
+	app := newTestApp(t, []string{"claude", "gemini"})
 	app.stdin = strings.NewReader("hello\n")
 	app.stdinIsTTY = false
 	app.ttyAvailable = true
-	app.selector.selected = "qwen"
+	app.selector.selected = "gemini"
 
 	result := app.execute(context.Background(), "-b")
 
 	assertExitCode(t, result, 0)
-	assertEqual(t, result.stdout, "answer from qwen\n")
-	assertEqual(t, app.runner.calls[0].spec.Name, "qwen")
+	assertEqual(t, result.stdout, "answer from gemini\n")
+	assertEqual(t, app.runner.calls[0].spec.Name, "gemini")
 	assertStringSlicesEqual(t, app.runner.calls[0].spec.Args, []string{"-p", "hello\n"})
 }
 
@@ -130,10 +130,10 @@ func TestSelectorPromptDoesNotBlockOnOpenNonTTYStdin(t *testing.T) {
 	defer reader.Close()
 	defer writer.Close()
 
-	app := newTestApp(t, []string{"qwen"})
+	app := newTestApp(t, []string{"gemini"})
 	app.stdin = reader
 	app.stdinIsTTY = false
-	app.selector.selected = "qwen"
+	app.selector.selected = "gemini"
 
 	done := make(chan commandResult, 1)
 	go func() {
@@ -143,7 +143,7 @@ func TestSelectorPromptDoesNotBlockOnOpenNonTTYStdin(t *testing.T) {
 	select {
 	case result := <-done:
 		assertExitCode(t, result, 0)
-		assertEqual(t, app.runner.calls[0].spec.Name, "qwen")
+		assertEqual(t, app.runner.calls[0].spec.Name, "gemini")
 		assertStringSlicesEqual(t, app.runner.calls[0].spec.Args, []string{"-p", "explain cobra"})
 	case <-time.After(250 * time.Millisecond):
 		_ = reader.Close()
@@ -155,7 +155,7 @@ func TestSelectorPromptDoesNotBlockOnOpenNonTTYStdin(t *testing.T) {
 func TestDefaultBackendPriorityUsesFirstInstalledBackend(t *testing.T) {
 	t.Parallel()
 
-	app := newTestApp(t, []string{"q", "pi", "kimi"})
+	app := newTestApp(t, []string{"gemini", "pi"})
 
 	result := app.execute(context.Background(), "hello")
 
@@ -169,11 +169,27 @@ func TestExplicitBackendDoesNotFallbackWhenMissing(t *testing.T) {
 
 	app := newTestApp(t, []string{"pi"})
 
-	result := app.execute(context.Background(), "-b", "copilot", "hello")
+	result := app.execute(context.Background(), "-b", "gemini", "hello")
 
 	assertExitCode(t, result, ExitBackendUnavailable)
-	assertContains(t, result.stderr, "Selected backend not found: copilot")
+	assertContains(t, result.stderr, "Selected backend not found: gemini")
 	assertEqual(t, len(app.runner.calls), 0)
+}
+
+func TestModelFlagPassesSelectorToBackend(t *testing.T) {
+	t.Parallel()
+
+	app := newTestApp(t, []string{"pi"})
+
+	result := app.execute(context.Background(), "-b", "pi", "-m", "github-copilot/gpt-5.4-mini", "hello")
+
+	assertExitCode(t, result, 0)
+	assertEqual(t, app.runner.calls[0].spec.Name, "pi")
+	assertStringSlicesEqual(
+		t,
+		app.runner.calls[0].spec.Args,
+		[]string{"--model", "github-copilot/gpt-5.4-mini", "-p", "hello"},
+	)
 }
 
 func TestNoBackendReturnsClearError(t *testing.T) {
@@ -186,7 +202,7 @@ func TestNoBackendReturnsClearError(t *testing.T) {
 	assertExitCode(t, result, ExitBackendUnavailable)
 	assertContains(t, result.stderr, "No supported backend found")
 	assertContains(t, result.stderr, "opencode")
-	assertContains(t, result.stderr, "roo")
+	assertContains(t, result.stderr, "gemini")
 	assertEqual(t, len(app.runner.calls), 0)
 }
 

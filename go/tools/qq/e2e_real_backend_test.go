@@ -27,7 +27,7 @@ func TestE2ERealBackendsReturnExpectedFormat(t *testing.T) {
 	}
 
 	for _, item := range backend.Supported() {
-		name := fmt.Sprint(item.Name)
+		name := fmt.Sprint(item.Name())
 
 		t.Run(name, func(t *testing.T) {
 			executablePath, err := exec.LookPath(name)

@@ -30,6 +30,8 @@ func New(qqApp *appcore.App, args []string) *cobra.Command {
 	// Cobra skips flag value completion when NoOptDefVal makes the flag value optional.
 	addBackendFlag(cmd, "backend", "b", !completionRequest)
 	addBackendFlag(cmd, "provider", "p", !completionRequest)
+	cmd.Flags().StringP("model", "m", "", "model selector to pass to the backend")
+	mustRegisterNoFileFlagCompletion(cmd, "model")
 
 	if len(args) > 0 && args[0] == "completion" {
 		cmd.AddCommand(newCompletionCommand())
