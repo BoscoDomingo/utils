@@ -1,0 +1,28 @@
+id: positive-trigger-002
+name: Fresh By Default and Built-In Shorthand
+description: Dry-run default allocation; manually review simplicity, approval, and name/path collisions.
+tags:
+  - positive-trigger
+inputs:
+  prompt: |
+    Explain a hypothetical isolation request without commands or file writes.
+    BASE is pinned. copy-1 is empty above BASE and unused; copy-3 is registered.
+    copy-2 is unregistered but its sibling destination already exists. The user
+    has not requested reuse or approved creation. Is built-in jj w acceptable?
+    Expected behavior: choose fresh copy-4, not reusable copy-1 or occupied copy-2;
+    ask approval for BASE, name, path, and setup commands. Accept built-in jj w
+    without relying on local aliases. Recheck availability after approval; if
+    another agent took it, reselect and confirm rather than overwrite. No locks,
+    reservations, shell allocation script, or source movement.
+expected:
+  should_trigger: true
+graders:
+  - type: text
+    name: contains-keywords
+    config:
+      contains:
+        - "copy-4"
+        - "approval"
+        - "jj w"
+      not_contains:
+        - "allocator.lock"

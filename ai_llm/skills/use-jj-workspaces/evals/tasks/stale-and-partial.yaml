@@ -1,0 +1,32 @@
+id: workspace-recovery-001
+name: Reuse By Request and Partial Creation
+description: Dry-run explicit reuse; manually review active work, cleanliness checks, and refusal to repair.
+tags:
+  - positive-trigger
+inputs:
+  prompt: |
+    Explain hypothetical explicit reuse requests without commands or file writes.
+    copy-1 has recorded empty @ above BASE, but background-job activity and
+    filesystem edits are unknown. copy-2 is stale. copy-3 is empty above a
+    different base with unbookmarked work. copy-4 is confirmed inactive and clean,
+    undescribed, conflict-free, non-divergent, directly above BASE, with no
+    references, descendants, or other workspace sharing @; path/repository,
+    sparse patterns and colocation match. Separately, approved fresh creation
+    fails after leaving a .jj directory and registration.
+    Expected behavior: ask about active users/jobs and filesystem work on copy-1;
+    recorded emptiness alone is insufficient. Require approval for any snapshot
+    and disable auto-update-stale. Stop and ask on copy-2/copy-3, do not repair or
+    move them. Reuse copy-4 only after verification, without repositioning. Leave
+    partial creation intact and report recovery needs; no automatic cleanup,
+    silent fresh substitution, or ownership/locking protocol.
+expected:
+  should_trigger: true
+graders:
+  - type: text
+    name: contains-keywords
+    config:
+      contains:
+        - "stale"
+        - "active"
+        - "approval"
+        - "copy-4"

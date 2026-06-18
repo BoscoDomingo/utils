@@ -1,0 +1,25 @@
+id: workspace-count-age-001
+name: Count and Outdated Workspace Recommendations
+description: Dry-run judgement scenario; manually review recommendations without fixed thresholds or cleanup.
+tags:
+  - positive-trigger
+inputs:
+  prompt: |
+    Explain hypothetical fresh allocations without commands or file writes.
+    Repository A has two workspaces far behind the intended base. Repository B
+    has eight recent workspaces, perhaps all active. Repository C has three
+    recent workspaces. The user has not approved cleanup or requested reuse.
+    Expected behavior: recommend trimming A's very outdated workspaces; recommend
+    trimming B or ask if its count is acceptable. Use judgement, not a hard
+    count/age limit. C needs no automatic warning. Stay fresh by default; never
+    remove, forget, update-stale, or reuse merely because workspaces are old.
+expected:
+  should_trigger: true
+graders:
+  - type: text
+    name: contains-keywords
+    config:
+      contains:
+        - "trimming"
+        - "count"
+        - "approval"
