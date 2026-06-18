@@ -20,7 +20,7 @@ func TestSupportedBackendsKeepPriorityAndArgvTemplates(t *testing.T) {
 			Args: []string{"run", promptPlaceholder},
 			Env:  []string{"OPENCODE_DISABLE_EXTERNAL_SKILLS=1"},
 		},
-		{Name: "pi", Args: []string{"-p", promptPlaceholder}},
+		{Name: "pi", Args: []string{"--model", piDefaultModel, "-p", promptPlaceholder}},
 		{Name: "codex", Args: []string{"exec", "--ephemeral", promptPlaceholder}},
 		{Name: "claude", Args: []string{"--safe-mode", "-p", promptPlaceholder}},
 		{Name: "agent", Args: []string{"--mode", "ask", "-p", promptPlaceholder}},

@@ -13,6 +13,9 @@ type backendName = string
 
 const promptPlaceholder = "{prompt}"
 
+// Pi keeps sticky model state; a provider-qualified model avoids OpenAI API fallback.
+const piDefaultModel = "github-copilot/gpt-5.5"
+
 type Backend struct {
 	Name backendName
 	Args []string
@@ -97,7 +100,9 @@ var supportedBackends = map[backendName]commandTemplate{
 		Args: []string{"run", promptPlaceholder},
 		Env:  []string{"OPENCODE_DISABLE_EXTERNAL_SKILLS=1"},
 	},
-	"pi":       {Args: []string{"-p", promptPlaceholder}},
+	"pi": {
+		Args: []string{"--model", piDefaultModel, "-p", promptPlaceholder},
+	},
 	"codex":    {Args: []string{"exec", "--ephemeral", promptPlaceholder}},
 	"claude":   {Args: []string{"--safe-mode", "-p", promptPlaceholder}},
 	"agent":    {Args: []string{"--mode", "ask", "-p", promptPlaceholder}},

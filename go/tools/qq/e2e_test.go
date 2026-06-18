@@ -97,7 +97,11 @@ func TestE2EPriorityFallsThroughMissingBinaries(t *testing.T) {
 
 	assertExitStatus(t, result, 0)
 	assertEqual(t, result.stdout, "fake stdout from pi\n")
-	assertStringSlicesEqual(t, harness.argv(t, "pi"), []string{"-p", "hello"})
+	assertStringSlicesEqual(
+		t,
+		harness.argv(t, "pi"),
+		[]string{"--model", "github-copilot/gpt-5.5", "-p", "hello"},
+	)
 	assertEqual(t, harness.backendRan("q"), false)
 }
 
