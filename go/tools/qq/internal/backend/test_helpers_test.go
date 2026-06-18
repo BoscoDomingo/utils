@@ -30,6 +30,7 @@ func assertBackendsEqual(t *testing.T, got []Backend, want []Backend) {
 	for index := range got {
 		assertEqual(t, got[index].Name, want[index].Name)
 		assertStringSlicesEqual(t, got[index].Args, want[index].Args)
+		assertStringSlicesEqual(t, got[index].Env, want[index].Env)
 	}
 }
 

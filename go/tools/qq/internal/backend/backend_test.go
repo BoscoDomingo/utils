@@ -15,10 +15,14 @@ func TestSupportedBackendsKeepPriorityAndArgvTemplates(t *testing.T) {
 	t.Parallel()
 
 	expected := []Backend{
-		{Name: "opencode", Args: []string{"run", promptPlaceholder}},
+		{
+			Name: "opencode",
+			Args: []string{"run", promptPlaceholder},
+			Env:  []string{"OPENCODE_DISABLE_EXTERNAL_SKILLS=1"},
+		},
 		{Name: "pi", Args: []string{"-p", promptPlaceholder}},
 		{Name: "codex", Args: []string{"exec", "--ephemeral", promptPlaceholder}},
-		{Name: "claude", Args: []string{"-p", promptPlaceholder}},
+		{Name: "claude", Args: []string{"--safe-mode", "-p", promptPlaceholder}},
 		{Name: "agent", Args: []string{"--mode", "ask", "-p", promptPlaceholder}},
 		{Name: "copilot", Args: []string{"-sp", promptPlaceholder}},
 		{Name: "openclaw", Args: []string{"agent", "--agent", "main", "--message", promptPlaceholder}},
@@ -46,11 +50,13 @@ func TestSupportedReturnsCopy(t *testing.T) {
 	backends := Supported()
 	backends[0].Name = "changed"
 	backends[0].Args[0] = "changed"
+	backends[0].Env[0] = "changed"
 
 	freshBackends := Supported()
 
 	assertEqual(t, freshBackends[0].Name, "opencode")
 	assertStringSlicesEqual(t, freshBackends[0].Args, []string{"run", promptPlaceholder})
+	assertStringSlicesEqual(t, freshBackends[0].Env, []string{"OPENCODE_DISABLE_EXTERNAL_SKILLS=1"})
 }
 
 func TestCommandForBackendRendersPromptAsSingleArgument(t *testing.T) {
@@ -68,8 +74,24 @@ func TestCommandForBackendRendersPromptAsSingleArgument(t *testing.T) {
 			assertEqual(t, ok, true)
 			assertEqual(t, spec.Name, item.Name)
 			assertStringSlicesEqual(t, spec.Args, expectedArgv(item.Args, prompt))
+			assertStringSlicesEqual(t, spec.Env, item.Env)
 		})
 	}
+}
+
+func TestCommandForBackendReturnsCopies(t *testing.T) {
+	t.Parallel()
+
+	spec, ok := CommandForBackend("opencode", "hello")
+	assertEqual(t, ok, true)
+	spec.Args[0] = "changed"
+	spec.Env[0] = "changed"
+
+	freshSpec, ok := CommandForBackend("opencode", "hello")
+
+	assertEqual(t, ok, true)
+	assertStringSlicesEqual(t, freshSpec.Args, []string{"run", "hello"})
+	assertStringSlicesEqual(t, freshSpec.Env, []string{"OPENCODE_DISABLE_EXTERNAL_SKILLS=1"})
 }
 
 func TestCommandForBackendRejectsUnsupportedBackend(t *testing.T) {
@@ -126,6 +148,33 @@ printf 'runner stdout\n'
 	argv, err := os.ReadFile(argvPath)
 	assertNoError(t, err)
 	assertEqual(t, string(argv), "-p\n"+prompt+"\n")
+}
+
+func TestOSRunnerPassesCommandEnvironment(t *testing.T) {
+	t.Parallel()
+
+	workDir := t.TempDir()
+	backendPath := filepath.Join(workDir, "backend")
+	script := `#!/bin/sh
+printf '%s\n' "$OPENCODE_DISABLE_EXTERNAL_SKILLS"
+`
+	assertNoError(t, os.WriteFile(backendPath, []byte(script), 0o755))
+
+	var stdout bytes.Buffer
+	var stderr bytes.Buffer
+	err := OSRunner{}.Run(
+		context.Background(),
+		CommandSpec{
+			Name: backendPath,
+			Env:  []string{"OPENCODE_DISABLE_EXTERNAL_SKILLS=1"},
+		},
+		&stdout,
+		&stderr,
+	)
+
+	assertNoError(t, err)
+	assertEqual(t, stdout.String(), "1\n")
+	assertEqual(t, stderr.String(), "")
 }
 
 func TestOSRunnerConvertsNonZeroExitToBackendExitError(t *testing.T) {

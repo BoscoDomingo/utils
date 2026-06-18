@@ -11,7 +11,7 @@ I wanted something simple but a bit more sophisticated that could deal with each
 ```sh
 qq() {
   local -a backend
-  backend=(claude -p)
+  backend=(claude --safe-mode -p)
 
   if [[ "$1" == "-b" ]]; then
     shift
@@ -64,6 +64,8 @@ Dependencies:
 - `golang.org/x/sys/unix` — non-blocking stdin readiness checks
 
 Implementation uses `exec.Command` with argv slices. Prompts are never passed through shell string interpolation or `eval`.
+Backend-specific environment overrides are set only when listed in
+[`internal/backend/backend.go`](internal/backend/backend.go).
 
 ## Product decisions
 
@@ -181,11 +183,15 @@ Args-only invocations must never hang waiting for stdin.
 Authoritative source: [`internal/backend/backend.go`](internal/backend/backend.go)
 (`supportedBackends`).
 
-Backend priority and argv templates are intentionally not duplicated here.
+Backend priority, argv templates, and backend-specific environment overrides are
+intentionally not duplicated here.
 Keep behavior changes in source and tests, then update this spec only when the
 contract changes.
 
 Missing-command detection checks only the executable name on `PATH`, not subcommands.
+Where a backend provides a supported skill-discovery suppression mechanism, `qq`
+uses it in the backend command mapping. Cursor Agent currently has no documented
+equivalent in this contract, so `qq` does not claim to disable Cursor skills.
 
 ## Acceptance criteria
 
@@ -194,7 +200,8 @@ Missing-command detection checks only the executable name on `PATH`, not subcomm
 3. `echo "question" | qq` works with stdin-only input.
 4. Empty args plus empty stdin exits non-zero with concise usage on stderr.
 5. Backend priority matches `internal/backend/backend.go`.
-6. Each backend is invoked per its source argv template with the prompt as one literal argument.
+6. Each backend is invoked per its source command template with the prompt as one
+   literal argument.
 7. No `eval` or shell-built command strings for prompt execution.
 8. If no supported backend binary is found, `qq` exits non-zero and lists supported backends on stderr.
 9. If a found backend exits non-zero, `qq` exits non-zero without trying lower-priority installed backends.

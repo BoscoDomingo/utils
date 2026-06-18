@@ -19,12 +19,12 @@ See [`spec.md`](spec.md) for the full behavior and architecture spec.
 ## The "quick-and-dirty" alternative (and why this exists)
 
 ```sh
-alias qq="claude --bare -p"
+alias qq="claude --safe-mode -p"
 
 # or
 qq() {
   local -a backend
-  backend=(claude -p)
+  backend=(claude --safe-mode -p)
 
   if [[ "$1" == "-b" ]]; then
     shift
@@ -92,6 +92,10 @@ qq completion fish
 `internal/selector`. Backend priority and argv mappings live in
 [`internal/backend/backend.go`](internal/backend/backend.go); treat that source
 as authoritative when behavior and docs differ.
+
+Where a backend exposes a supported non-interactive skill-suppression control,
+`qq` applies it in the backend mapping. Backends without such a control still
+run with the safest documented non-interactive/ask-style argv known to `qq`.
 
 Automated tests are split by scope:
 

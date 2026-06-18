@@ -161,6 +161,26 @@ func (harness *e2eHarness) argv(t *testing.T, backend string) []string {
 	return argv
 }
 
+func (harness *e2eHarness) capturedEnv(t *testing.T, backend string) map[string]string {
+	t.Helper()
+
+	data, err := os.ReadFile(filepath.Join(harness.captureDir, backend+".env"))
+	assertNoError(t, err)
+
+	env := map[string]string{}
+	for _, line := range strings.Split(strings.TrimSpace(string(data)), "\n") {
+		if line == "" {
+			continue
+		}
+		key, value, ok := strings.Cut(line, "=")
+		if !ok {
+			t.Fatalf("malformed captured env line: %q", line)
+		}
+		env[key] = value
+	}
+	return env
+}
+
 func (harness *e2eHarness) backendRan(backend string) bool {
 	_, err := os.Stat(filepath.Join(harness.captureDir, backend+".argv0"))
 	return err == nil
@@ -196,7 +216,6 @@ func assertExitStatus(t *testing.T, result e2eResult, expected int) {
 		)
 	}
 }
-
 
 func assertNoError(t *testing.T, err error) {
 	t.Helper()

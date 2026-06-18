@@ -12,6 +12,12 @@ for arg in "$@"; do
 	printf '%s\0' "$arg" >> "$argv_file"
 done
 
+env_file="$QQ_FAKE_CAPTURE_DIR/$backend_name.env"
+: > "$env_file"
+if [ "${OPENCODE_DISABLE_EXTERNAL_SKILLS:-}" != "" ]; then
+	printf 'OPENCODE_DISABLE_EXTERNAL_SKILLS=%s\n' "$OPENCODE_DISABLE_EXTERNAL_SKILLS" >> "$env_file"
+fi
+
 if [ "${QQ_FAKE_STDOUT:-}" != "" ]; then
 	printf '%s' "$QQ_FAKE_STDOUT"
 else

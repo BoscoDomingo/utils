@@ -16,11 +16,13 @@ const promptPlaceholder = "{prompt}"
 type Backend struct {
 	Name backendName
 	Args []string
+	Env  []string
 }
 
 type CommandSpec struct {
 	Name backendName
 	Args []string
+	Env  []string
 }
 
 type CommandRunner interface {
@@ -45,6 +47,7 @@ func (runner OSRunner) Run(
 	stderr *bytes.Buffer,
 ) error {
 	cmd := exec.CommandContext(ctx, string(spec.Name), spec.Args...)
+	cmd.Env = append(cmd.Environ(), spec.Env...)
 	cmd.Stdout = stdout
 	cmd.Stderr = stderr
 
@@ -84,27 +87,35 @@ var backendPriority = []backendName{
 	"roo",
 }
 
-var supportedBackends = map[backendName][]string{
-	"opencode": {"run", promptPlaceholder},
-	"pi":       {"-p", promptPlaceholder},
-	"codex":    {"exec", "--ephemeral", promptPlaceholder},
-	"claude":   {"-p", promptPlaceholder},
-	"agent":    {"--mode", "ask", "-p", promptPlaceholder},
-	"copilot":  {"-sp", promptPlaceholder},
-	"openclaw": {"agent", "--agent", "main", "--message", promptPlaceholder},
-	"gemini":   {"-p", promptPlaceholder},
-	"qwen":     {"-p", promptPlaceholder},
-	"q":        {"chat", "--non-interactive", promptPlaceholder},
-	"kimi":     {"--quiet", "-p", promptPlaceholder},
-	"kilo":     {"run", promptPlaceholder},
-	"kiro-cli": {"chat", "--no-interactive", promptPlaceholder},
-	"goose":    {"run", "--no-session", "-t", promptPlaceholder},
-	"aider":    {"--message", promptPlaceholder},
-	"amp":      {"-x", promptPlaceholder},
-	"droid":    {"exec", promptPlaceholder},
-	"crush":    {"run", "--quiet", promptPlaceholder},
-	"cn":       {"-p", promptPlaceholder, "--silent"},
-	"roo":      {"--print", promptPlaceholder},
+type commandTemplate struct {
+	Args []string
+	Env  []string
+}
+
+var supportedBackends = map[backendName]commandTemplate{
+	"opencode": {
+		Args: []string{"run", promptPlaceholder},
+		Env:  []string{"OPENCODE_DISABLE_EXTERNAL_SKILLS=1"},
+	},
+	"pi":       {Args: []string{"-p", promptPlaceholder}},
+	"codex":    {Args: []string{"exec", "--ephemeral", promptPlaceholder}},
+	"claude":   {Args: []string{"--safe-mode", "-p", promptPlaceholder}},
+	"agent":    {Args: []string{"--mode", "ask", "-p", promptPlaceholder}},
+	"copilot":  {Args: []string{"-sp", promptPlaceholder}},
+	"openclaw": {Args: []string{"agent", "--agent", "main", "--message", promptPlaceholder}},
+	"gemini":   {Args: []string{"-p", promptPlaceholder}},
+	"qwen":     {Args: []string{"-p", promptPlaceholder}},
+	"q":        {Args: []string{"chat", "--non-interactive", promptPlaceholder}},
+	"kimi":     {Args: []string{"--quiet", "-p", promptPlaceholder}},
+	"kilo":     {Args: []string{"run", promptPlaceholder}},
+	"kiro-cli": {Args: []string{"chat", "--no-interactive", promptPlaceholder}},
+	"goose":    {Args: []string{"run", "--no-session", "-t", promptPlaceholder}},
+	"aider":    {Args: []string{"--message", promptPlaceholder}},
+	"amp":      {Args: []string{"-x", promptPlaceholder}},
+	"droid":    {Args: []string{"exec", promptPlaceholder}},
+	"crush":    {Args: []string{"run", "--quiet", promptPlaceholder}},
+	"cn":       {Args: []string{"-p", promptPlaceholder, "--silent"}},
+	"roo":      {Args: []string{"--print", promptPlaceholder}},
 }
 
 func Supported() []Backend {
@@ -112,7 +123,8 @@ func Supported() []Backend {
 	for index, name := range backendPriority {
 		backends[index] = Backend{
 			Name: name,
-			Args: append([]string(nil), supportedBackends[name]...),
+			Args: append([]string(nil), supportedBackends[name].Args...),
+			Env:  append([]string(nil), supportedBackends[name].Env...),
 		}
 	}
 	return backends
@@ -124,8 +136,8 @@ func CommandForBackend(backendName backendName, prompt string) (CommandSpec, boo
 		return CommandSpec{}, false
 	}
 
-	args := make([]string, len(template))
-	for index, arg := range template {
+	args := make([]string, len(template.Args))
+	for index, arg := range template.Args {
 		if arg == promptPlaceholder {
 			args[index] = prompt
 			continue
@@ -133,7 +145,8 @@ func CommandForBackend(backendName backendName, prompt string) (CommandSpec, boo
 		args[index] = arg
 	}
 
-	return CommandSpec{Name: backendName, Args: args}, true
+	env := append([]string(nil), template.Env...)
+	return CommandSpec{Name: backendName, Args: args, Env: env}, true
 }
 
 func IsSupported(name backendName) bool {

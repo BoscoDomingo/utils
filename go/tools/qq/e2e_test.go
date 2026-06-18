@@ -21,6 +21,7 @@ func TestE2EArgsOnlyPrompt(t *testing.T) {
 	assertEqual(t, result.stdout, "fake stdout from opencode\n")
 	assertEqual(t, result.stderr, "")
 	assertStringSlicesEqual(t, harness.argv(t, "opencode"), []string{"run", "how now"})
+	assertEqual(t, harness.capturedEnv(t, "opencode")["OPENCODE_DISABLE_EXTERNAL_SKILLS"], "1")
 }
 
 func TestE2EStdinOnlyPrompt(t *testing.T) {
@@ -48,6 +49,30 @@ func TestE2EArgsAndStdinMergePrompt(t *testing.T) {
 		harness.argv(t, "opencode"),
 		[]string{"run", "summarize\n\nContext:\n\ncontext\n"},
 	)
+	assertEqual(t, harness.capturedEnv(t, "opencode")["OPENCODE_DISABLE_EXTERNAL_SKILLS"], "1")
+}
+
+func TestE2EClaudeUsesSafeMode(t *testing.T) {
+	t.Parallel()
+
+	harness := newE2EHarness(t, []string{"claude"})
+	prompt := "literal $(echo bad)"
+
+	result := harness.run(t, []string{"-b", "claude", prompt}, nil)
+
+	assertExitStatus(t, result, 0)
+	assertStringSlicesEqual(t, harness.argv(t, "claude"), []string{"--safe-mode", "-p", prompt})
+}
+
+func TestE2EDefaultClaudeUsesSafeMode(t *testing.T) {
+	t.Parallel()
+
+	harness := newE2EHarness(t, []string{"claude"})
+
+	result := harness.run(t, []string{"hello"}, nil)
+
+	assertExitStatus(t, result, 0)
+	assertStringSlicesEqual(t, harness.argv(t, "claude"), []string{"--safe-mode", "-p", "hello"})
 }
 
 func TestE2EExplicitBackend(t *testing.T) {
