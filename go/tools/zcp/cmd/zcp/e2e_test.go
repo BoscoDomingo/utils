@@ -136,7 +136,11 @@ func TestCLIFlagsE2E(t *testing.T) {
 			diff = -diff
 		}
 		if diff > time.Second {
-			t.Fatalf("expected destination modtime near %v, got %v", expectedModTime, info.ModTime())
+			t.Fatalf(
+				"expected destination modtime near %v, got %v",
+				expectedModTime,
+				info.ModTime(),
+			)
 		}
 	}
 
@@ -269,7 +273,14 @@ func TestCLIFlagsE2E(t *testing.T) {
 			t.Fatalf("write source file: %v", err)
 		}
 
-		stdout, stderr, err := runCLI(t, tempDir, "--buffer-size", "17", sourceFile, destinationFile)
+		stdout, stderr, err := runCLI(
+			t,
+			tempDir,
+			"--buffer-size",
+			"17",
+			sourceFile,
+			destinationFile,
+		)
 		if err != nil {
 			t.Fatalf("buffer-size copy failed: %v (stdout=%q, stderr=%q)", err, stdout, stderr)
 		}

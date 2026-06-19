@@ -58,7 +58,13 @@ func TestProgressFormattingHelpers(t *testing.T) {
 
 				got := buildBar(testCase.percentage, testCase.width)
 				if got != testCase.want {
-					t.Fatalf("buildBar(%v, %d) = %q, want %q", testCase.percentage, testCase.width, got, testCase.want)
+					t.Fatalf(
+						"buildBar(%v, %d) = %q, want %q",
+						testCase.percentage,
+						testCase.width,
+						got,
+						testCase.want,
+					)
 				}
 			})
 		}

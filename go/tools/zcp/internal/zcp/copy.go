@@ -27,7 +27,11 @@ type copyOperation struct {
 	size        uint64
 }
 
-func buildCopyPlan(sources []string, destination string, recursive bool) ([]copyOperation, uint64, error) {
+func buildCopyPlan(
+	sources []string,
+	destination string,
+	recursive bool,
+) ([]copyOperation, uint64, error) {
 	destInfo, destErr := os.Stat(destination)
 	destExists := destErr == nil
 	if destErr != nil && !errors.Is(destErr, os.ErrNotExist) {
@@ -36,7 +40,10 @@ func buildCopyPlan(sources []string, destination string, recursive bool) ([]copy
 
 	destIsDir := destExists && destInfo.IsDir()
 	if len(sources) > 1 && !destIsDir {
-		return nil, 0, fmt.Errorf("destination %q must be an existing directory when copying multiple sources", destination)
+		return nil, 0, fmt.Errorf(
+			"destination %q must be an existing directory when copying multiple sources",
+			destination,
+		)
 	}
 
 	plan := make([]copyOperation, 0, len(sources))
@@ -65,7 +72,11 @@ func buildCopyPlan(sources []string, destination string, recursive bool) ([]copy
 			}
 
 			if destExists && !destIsDir && len(sources) == 1 {
-				return nil, 0, fmt.Errorf("cannot overwrite non-directory %q with directory %q", destination, source)
+				return nil, 0, fmt.Errorf(
+					"cannot overwrite non-directory %q with directory %q",
+					destination,
+					source,
+				)
 			}
 
 			if err := ensureDestinationOutsideSource(source, target); err != nil {
@@ -109,7 +120,10 @@ func buildCopyPlan(sources []string, destination string, recursive bool) ([]copy
 	return plan, totalBytes, nil
 }
 
-func collectDirectoryOperations(sourceRoot string, destinationRoot string) ([]copyOperation, uint64, error) {
+func collectDirectoryOperations(
+	sourceRoot string,
+	destinationRoot string,
+) ([]copyOperation, uint64, error) {
 	operations := make([]copyOperation, 0, 16)
 	var totalBytes uint64
 
@@ -242,7 +256,11 @@ func executePlan(plan []copyOperation, opts options, progress *progressBar) erro
 	if opts.preserve {
 		for i := len(directoriesToPreserve) - 1; i >= 0; i-- {
 			directory := directoriesToPreserve[i]
-			if err := setMetadata(directory.destination, directory.mode, directory.modTime); err != nil {
+			if err := setMetadata(
+				directory.destination,
+				directory.mode,
+				directory.modTime,
+			); err != nil {
 				return err
 			}
 		}
@@ -260,7 +278,9 @@ func copyFile(op copyOperation, opts options, progress *progressBar) error {
 	if err != nil {
 		return fmt.Errorf("open source file %q: %w", op.source, err)
 	}
-	defer sourceFile.Close()
+	defer func() {
+		_ = sourceFile.Close()
+	}()
 
 	flags := os.O_CREATE | os.O_WRONLY | os.O_TRUNC
 	if !opts.force {
@@ -281,11 +301,11 @@ func copyFile(op copyOperation, opts options, progress *progressBar) error {
 		if readBytes > 0 {
 			writtenBytes, writeErr := destinationFile.Write(buffer[:readBytes])
 			if writeErr != nil {
-				destinationFile.Close()
+				_ = destinationFile.Close()
 				return fmt.Errorf("write destination file %q: %w", op.destination, writeErr)
 			}
 			if writtenBytes != readBytes {
-				destinationFile.Close()
+				_ = destinationFile.Close()
 				return fmt.Errorf("write destination file %q: short write", op.destination)
 			}
 			progress.add(uint64(writtenBytes))
@@ -295,7 +315,7 @@ func copyFile(op copyOperation, opts options, progress *progressBar) error {
 			break
 		}
 		if readErr != nil {
-			destinationFile.Close()
+			_ = destinationFile.Close()
 			return fmt.Errorf("read source file %q: %w", op.source, readErr)
 		}
 	}

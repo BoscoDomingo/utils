@@ -1,4 +1,4 @@
-name: Format & Lint
+name: Lint
 
 on:
   push:
@@ -16,49 +16,18 @@ on:
   workflow_dispatch:
 
 concurrency:
-  group: zcp-format-lint-${{ github.workflow }}-${{ github.ref }}
+  group: zcp-lint-${{ github.workflow }}-${{ github.ref }}
   cancel-in-progress: true
 
 jobs:
-  format:
-    runs-on: ubuntu-latest
-    steps:
-      - name: Checkout
-        uses: actions/checkout@v6
-
-      - name: Setup Go with module cache
-        uses: actions/setup-go@v6
-        with:
-          go-version-file: go/tools/zcp/go.mod
-          cache: true
-          cache-dependency-path: |
-            go/tools/zcp/go.mod
-            go/tools/zcp/go.sum
-
-      - name: Cache golangci-lint data
-        uses: actions/cache@v5
-        with:
-          path: ~/.cache/golangci-lint
-          key: ${{ runner.os }}-golangci-format-${{ hashFiles('go/tools/zcp/go.mod', 'go/tools/zcp/go.sum', 'go/tools/zcp/.golangci.yml') }}
-          restore-keys: |
-            ${{ runner.os }}-golangci-format-
-
-      - name: Check formatting via golangci-lint
-        uses: golangci/golangci-lint-action@v9
-        with:
-          version: latest
-          working-directory: go/tools/zcp
-          args: fmt --diff --timeout=5m ./...
-          skip-cache: false
-
   lint:
     runs-on: ubuntu-latest
     steps:
       - name: Checkout
-        uses: actions/checkout@v6
+        uses: actions/checkout@9c091bb21b7c1c1d1991bb908d89e4e9dddfe3e0 # v7
 
       - name: Setup Go with module cache
-        uses: actions/setup-go@v6
+        uses: actions/setup-go@4a3601121dd01d1626a1e23e37211e3254c1c06c # v6
         with:
           go-version-file: go/tools/zcp/go.mod
           cache: true
@@ -67,7 +36,7 @@ jobs:
             go/tools/zcp/go.sum
 
       - name: Cache golangci-lint data
-        uses: actions/cache@v5
+        uses: actions/cache@27d5ce7f107fe9357f9df03efb73ab90386fccae # v5
         with:
           path: ~/.cache/golangci-lint
           key: ${{ runner.os }}-golangci-${{ hashFiles('go/tools/zcp/go.mod', 'go/tools/zcp/go.sum', 'go/tools/zcp/.golangci.yml') }}
@@ -75,9 +44,9 @@ jobs:
             ${{ runner.os }}-golangci-
 
       - name: Run golangci-lint
-        uses: golangci/golangci-lint-action@v9
+        uses: golangci/golangci-lint-action@82606bf257cbaff209d206a39f5134f0cfbfd2ee # v9
         with:
-          version: latest
+          version: v2.12.2
           working-directory: go/tools/zcp
           args: --timeout=5m ./...
           skip-cache: false

@@ -44,12 +44,21 @@ func Run(args []string, stdout io.Writer, stderr io.Writer) error {
 	if opts.verbose {
 		for _, op := range plan {
 			if op.kind == operationCopyFile {
-				fmt.Fprintf(stdout, "created: %s\n", op.destination)
+				if _, err := fmt.Fprintf(stdout, "created: %s\n", op.destination); err != nil {
+					return fmt.Errorf("write verbose output: %w", err)
+				}
 			}
 		}
 	}
 
-	fmt.Fprintf(stdout, "Copied %d file(s), %s total.\n", countFiles(plan), humanizeBytes(totalBytes))
+	if _, err := fmt.Fprintf(
+		stdout,
+		"Copied %d file(s), %s total.\n",
+		countFiles(plan),
+		humanizeBytes(totalBytes),
+	); err != nil {
+		return fmt.Errorf("write summary output: %w", err)
+	}
 	return nil
 }
 
@@ -74,12 +83,12 @@ func parseArgs(args []string, stderr io.Writer) (options, []string, string, erro
 	fs.IntVar(&opts.bufferSize, "buffer-size", defaultBufferSize, "copy buffer size in bytes")
 
 	fs.Usage = func() {
-		fmt.Fprintln(stderr, "zcp: copy files and directories with a progress bar")
-		fmt.Fprintln(stderr)
-		fmt.Fprintln(stderr, "Usage:")
-		fmt.Fprintln(stderr, "  zcp [options] SOURCE... DEST")
-		fmt.Fprintln(stderr)
-		fmt.Fprintln(stderr, "Options:")
+		writeUsageLine(stderr, "zcp: copy files and directories with a progress bar")
+		writeUsageLine(stderr)
+		writeUsageLine(stderr, "Usage:")
+		writeUsageLine(stderr, "  zcp [options] SOURCE... DEST")
+		writeUsageLine(stderr)
+		writeUsageLine(stderr, "Options:")
 		fs.PrintDefaults()
 	}
 
@@ -108,4 +117,8 @@ func countFiles(plan []copyOperation) int {
 		}
 	}
 	return count
+}
+
+func writeUsageLine(stderr io.Writer, values ...any) {
+	_, _ = fmt.Fprintln(stderr, values...)
 }

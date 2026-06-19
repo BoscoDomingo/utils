@@ -20,7 +20,11 @@ func TestCopyPlanAndExecution(t *testing.T) {
 		if err := os.MkdirAll(sourceDir, 0o755); err != nil {
 			t.Fatalf("mkdir source: %v", err)
 		}
-		if err := os.WriteFile(filepath.Join(sourceDir, "file.txt"), []byte("hello"), 0o644); err != nil {
+		if err := os.WriteFile(
+			filepath.Join(sourceDir, "file.txt"),
+			[]byte("hello"),
+			0o644,
+		); err != nil {
 			t.Fatalf("write source file: %v", err)
 		}
 
@@ -141,7 +145,11 @@ func TestCopyPlanAndExecution(t *testing.T) {
 			force:      false,
 			bufferSize: 4,
 		}
-		if err := executePlan(plan, noForce, newProgressBar(totalBytes, false, io.Discard)); err == nil {
+		if err := executePlan(
+			plan,
+			noForce,
+			newProgressBar(totalBytes, false, io.Discard),
+		); err == nil {
 			t.Fatalf("expected overwrite error without -f")
 		}
 
@@ -149,7 +157,11 @@ func TestCopyPlanAndExecution(t *testing.T) {
 			force:      true,
 			bufferSize: 4,
 		}
-		if err := executePlan(plan, withForce, newProgressBar(totalBytes, false, io.Discard)); err != nil {
+		if err := executePlan(
+			plan,
+			withForce,
+			newProgressBar(totalBytes, false, io.Discard),
+		); err != nil {
 			t.Fatalf("force overwrite failed: %v", err)
 		}
 

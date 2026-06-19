@@ -106,15 +106,15 @@ func (p *progressBar) render(final bool) {
 		if len(line) < p.lastRender {
 			padding = strings.Repeat(" ", p.lastRender-len(line))
 		}
-		fmt.Fprintf(p.writer, "\r%s%s", line, padding)
+		_, _ = fmt.Fprintf(p.writer, "\r%s%s", line, padding)
 		p.lastRender = len(line)
 		if final {
-			fmt.Fprint(p.writer, "\n")
+			_, _ = fmt.Fprint(p.writer, "\n")
 		}
 		return
 	}
 
-	fmt.Fprintln(p.writer, line)
+	_, _ = fmt.Fprintln(p.writer, line)
 }
 
 func formatProgressLine(done uint64, total uint64, bytesPerSecond float64) string {
