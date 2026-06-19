@@ -102,7 +102,10 @@ type fakeSelector struct {
 	selected string
 }
 
-func (selector *fakeSelector) Select(_ context.Context, backends []backend.Backend) (string, error) {
+func (selector *fakeSelector) Select(
+	_ context.Context,
+	backends []backend.Backend,
+) (string, error) {
 	if selector.selected != "" {
 		return selector.selected, nil
 	}

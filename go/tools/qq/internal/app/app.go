@@ -59,7 +59,10 @@ func (app *App) Run(ctx context.Context, args []string) error {
 		modelInfo(invocationResult.Model),
 	)
 	if !ok {
-		return app.printError(ExitBackendUnavailable, fmt.Sprintf("Unsupported backend: %s", backendName))
+		return app.printError(
+			ExitBackendUnavailable,
+			fmt.Sprintf("unsupported backend: %s", backendName),
+		)
 	}
 
 	var backendStdout bytes.Buffer

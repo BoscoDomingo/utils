@@ -11,18 +11,6 @@ type backendExpectation struct {
 	env  []string
 }
 
-func expectedArgv(template []string, prompt string) []string {
-	argv := make([]string, len(template))
-	for index, arg := range template {
-		if arg == promptPlaceholder {
-			argv[index] = prompt
-			continue
-		}
-		argv[index] = arg
-	}
-	return argv
-}
-
 func shellQuote(value string) string {
 	return "'" + strings.ReplaceAll(value, "'", "'\\''") + "'"
 }

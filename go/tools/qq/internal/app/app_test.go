@@ -11,8 +11,8 @@ import (
 func TestArgsOnlyPromptDoesNotBlockOnOpenNonTTYStdin(t *testing.T) {
 	reader, writer, err := os.Pipe()
 	assertNoError(t, err)
-	defer reader.Close()
-	defer writer.Close()
+	defer func() { _ = reader.Close() }()
+	defer func() { _ = writer.Close() }()
 
 	app := newTestApp(t, []string{"opencode"})
 	app.stdin = reader
@@ -38,8 +38,8 @@ func TestArgsOnlyPromptDoesNotBlockOnOpenNonTTYStdin(t *testing.T) {
 func TestArgsPromptSkipsPartialPipeStdinUntilWriterCloses(t *testing.T) {
 	reader, writer, err := os.Pipe()
 	assertNoError(t, err)
-	defer reader.Close()
-	defer writer.Close()
+	defer func() { _ = reader.Close() }()
+	defer func() { _ = writer.Close() }()
 
 	_, err = writer.WriteString("context\n")
 	assertNoError(t, err)
@@ -76,7 +76,7 @@ func TestArgsPromptMergesImmediatelyAvailablePipeStdin(t *testing.T) {
 	_, err = writer.WriteString("context\n")
 	assertNoError(t, err)
 	assertNoError(t, writer.Close())
-	defer reader.Close()
+	defer func() { _ = reader.Close() }()
 
 	app := newTestApp(t, []string{"opencode"})
 	app.stdin = reader
@@ -127,8 +127,8 @@ func TestSelectorUsesInjectedBackendWithPipedPrompt(t *testing.T) {
 func TestSelectorPromptDoesNotBlockOnOpenNonTTYStdin(t *testing.T) {
 	reader, writer, err := os.Pipe()
 	assertNoError(t, err)
-	defer reader.Close()
-	defer writer.Close()
+	defer func() { _ = reader.Close() }()
+	defer func() { _ = writer.Close() }()
 
 	app := newTestApp(t, []string{"gemini"})
 	app.stdin = reader
@@ -181,7 +181,10 @@ func TestModelFlagPassesSelectorToBackend(t *testing.T) {
 
 	app := newTestApp(t, []string{"pi"})
 
-	result := app.execute(context.Background(), "-b", "pi", "-m", "github-copilot/gpt-5.4-mini", "hello")
+	result := app.execute(
+		context.Background(),
+		"-b", "pi", "-m", "github-copilot/gpt-5.4-mini", "hello",
+	)
 
 	assertExitCode(t, result, 0)
 	assertEqual(t, app.runner.calls[0].spec.Name, "pi")

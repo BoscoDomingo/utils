@@ -46,7 +46,11 @@ func TestParseSelectorFlagPreservesPrompt(t *testing.T) {
 		{"prompt before flag", []string{"explain cobra", "-b"}, "explain cobra"},
 		{"long flag before prompt", []string{"--provider", "explain cobra"}, "explain cobra"},
 		{"long flag after prompt", []string{"explain cobra", "--backend"}, "explain cobra"},
-		{"empty equals flag before prompt", []string{"--backend=", "explain cobra"}, "explain cobra"},
+		{
+			"empty equals flag before prompt",
+			[]string{"--backend=", "explain cobra"},
+			"explain cobra",
+		},
 	}
 
 	for _, test := range tests {
@@ -163,7 +167,7 @@ func TestUnsupportedExplicitProviderReturnsError(t *testing.T) {
 
 	_, err := Parse([]string{"--backend", "bogus", "prompt"}, "", false, testSupportsBackend)
 
-	assertErrorContains(t, err, "Unsupported backend")
+	assertErrorContains(t, err, "unsupported backend")
 }
 
 func TestEmptyPromptReturnsUsageError(t *testing.T) {

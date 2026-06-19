@@ -173,7 +173,11 @@ func TestBackendSupportHelpers(t *testing.T) {
 
 	names := SupportedNames()
 
-	assertStringSlicesEqual(t, names, []string{"opencode", "pi", "codex", "claude", "agent", "gemini"})
+	assertStringSlicesEqual(
+		t,
+		names,
+		[]string{"opencode", "pi", "codex", "claude", "agent", "gemini"},
+	)
 	assertEqual(t, IsSupported("opencode"), true)
 	assertEqual(t, IsSupported("missing"), false)
 	assertEqual(t, names[0], "opencode")

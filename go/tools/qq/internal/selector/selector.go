@@ -26,7 +26,7 @@ func (selector Selector) Select(_ context.Context, backends []backend.Backend) (
 	if err != nil {
 		return "", err
 	}
-	defer tty.Close()
+	defer func() { _ = tty.Close() }()
 
 	delegate := list.NewDefaultDelegate()
 	model := newModel(backends, delegate)

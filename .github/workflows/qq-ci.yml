@@ -1,0 +1,68 @@
+name: qq CI
+
+on:
+  push:
+    paths: &paths
+      - "go/tools/qq/**/*.go"
+      - "go/tools/qq/go.mod"
+      - "go/tools/qq/go.sum"
+      - "go/tools/qq/.golangci.yml"
+      - ".github/workflows/qq-ci.yml"
+  pull_request:
+    paths: *paths
+  workflow_dispatch:
+
+concurrency:
+  group: qq-ci-${{ github.workflow }}-${{ github.ref }}
+  cancel-in-progress: true
+
+jobs:
+  lint:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout
+        uses: actions/checkout@9c091bb21b7c1c1d1991bb908d89e4e9dddfe3e0 # v7
+
+      - name: Setup Go with module cache
+        uses: actions/setup-go@4a3601121dd01d1626a1e23e37211e3254c1c06c # v6
+        with:
+          go-version-file: go/tools/qq/go.mod
+          cache: true
+          cache-dependency-path: |
+            go/tools/qq/go.mod
+            go/tools/qq/go.sum
+
+      - name: Cache golangci-lint data
+        uses: actions/cache@27d5ce7f107fe9357f9df03efb73ab90386fccae # v5
+        with:
+          path: ~/.cache/golangci-lint
+          key: ${{ runner.os }}-golangci-${{ hashFiles('go/tools/qq/go.mod', 'go/tools/qq/go.sum', 'go/tools/qq/.golangci.yml') }}
+          restore-keys: |
+            ${{ runner.os }}-golangci-
+
+      - name: Run golangci-lint
+        uses: golangci/golangci-lint-action@82606bf257cbaff209d206a39f5134f0cfbfd2ee # v9
+        with:
+          version: v2.12.2
+          working-directory: go/tools/qq
+          args: --timeout=5m ./...
+          skip-cache: false
+
+  test:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout
+        uses: actions/checkout@9c091bb21b7c1c1d1991bb908d89e4e9dddfe3e0 # v7
+
+      - name: Setup Go with module cache
+        uses: actions/setup-go@4a3601121dd01d1626a1e23e37211e3254c1c06c # v6
+        with:
+          go-version-file: go/tools/qq/go.mod
+          cache: true
+          cache-dependency-path: |
+            go/tools/qq/go.mod
+            go/tools/qq/go.sum
+
+      - name: Run tests
+        working-directory: go/tools/qq
+        run: go test ./...

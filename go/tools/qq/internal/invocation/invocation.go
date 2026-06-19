@@ -104,7 +104,12 @@ func Parse(
 		return Result{}, errors.New(usageText())
 	}
 
-	return Result{BackendName: backendName, NeedsSelector: needsSelector, Model: model, Prompt: prompt}, nil
+	return Result{
+		BackendName:   backendName,
+		NeedsSelector: needsSelector,
+		Model:         model,
+		Prompt:        prompt,
+	}, nil
 }
 
 func splitModelFlag(arg string) (*string, bool) {
@@ -152,7 +157,7 @@ func parseBackendFlagValue(
 		return value, "", false, nil
 	}
 	if hasRemainingArgs || hasPriorPrompt || hasStdin {
-		return "", "", false, fmt.Errorf("Unsupported backend: %s", value)
+		return "", "", false, fmt.Errorf("unsupported backend: %s", value)
 	}
 	return "", value, true, nil
 }

@@ -129,14 +129,23 @@ var supportedBackends = map[backendName]commandTemplate{
 		ModelArgs:     insertModelArgs(0),
 		ModelListArgs: []string{"--list-models"},
 	},
-	"codex":  {Args: []string{"exec", "--ephemeral", promptPlaceholder}, ModelArgs: insertModelArgs(2)},
-	"claude": {Args: []string{"--safe-mode", "-p", promptPlaceholder}, ModelArgs: insertModelArgs(1)},
+	"codex": {
+		Args:      []string{"exec", "--ephemeral", promptPlaceholder},
+		ModelArgs: insertModelArgs(2),
+	},
+	"claude": {
+		Args:      []string{"--safe-mode", "-p", promptPlaceholder},
+		ModelArgs: insertModelArgs(1),
+	},
 	"agent": {
 		Args:          []string{"--mode", "ask", "-p", promptPlaceholder},
 		ModelArgs:     insertModelArgs(2),
 		ModelListArgs: []string{"models"},
 	},
-	"gemini": {Args: []string{"-p", promptPlaceholder}, ModelArgs: insertModelArgs(0)},
+	"gemini": {
+		Args:      []string{"-p", promptPlaceholder},
+		ModelArgs: insertModelArgs(0),
+	},
 }
 
 func Supported() []Backend {
@@ -159,7 +168,11 @@ func CommandForBackend(backendName backendName, prompt string, model *LLMInfo) (
 	}
 
 	backend := commandBackend{name: backendName, template: template}
-	return CommandSpec{Name: backendName, Args: backend.Args(prompt, model), Env: backend.Env()}, true
+	return CommandSpec{
+		Name: backendName,
+		Args: backend.Args(prompt, model),
+		Env:  backend.Env(),
+	}, true
 }
 
 func IsSupported(name backendName) bool {
