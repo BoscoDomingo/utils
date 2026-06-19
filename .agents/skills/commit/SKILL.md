@@ -32,7 +32,6 @@ Use read-only Jujutsu commands freely when helpful: `jj status`, `jj diff`, `jj 
 - Use Jujutsu when `jj` is available and the checkout is a Jujutsu repo.
 - Use Git when Jujutsu is unavailable, `jj status` reports no repo, or there are no signs Jujutsu has been used here.
 - If using Jujutsu would require a mutating operation, ask for explicit approval before running it. Mutating Jujutsu operations include commits, working-copy movement (`jj new`, `jj edit`, `jj next`, `jj prev`), rebases, squashes, abandons, bookmark changes, undo, and `jj git push`.
-- Git commits do not need extra approval when the user has explicitly asked to commit.
 
 ## Commit conventions
 
