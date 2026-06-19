@@ -55,6 +55,11 @@ func assertNoError(t *testing.T, err error) {
 	}
 }
 
+func shellCommand(script string, args ...string) CommandSpec {
+	cmdArgs := append([]string{"-c", script, "backend"}, args...)
+	return CommandSpec{Name: "/bin/sh", Args: cmdArgs}
+}
+
 func assertEqual[T comparable](t *testing.T, got T, want T) {
 	t.Helper()
 

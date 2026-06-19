@@ -189,7 +189,6 @@ func TestOSRunnerPassesPromptAsLiteralArgument(t *testing.T) {
 	t.Parallel()
 
 	workDir := t.TempDir()
-	backendPath := filepath.Join(workDir, "backend")
 	argvPath := filepath.Join(workDir, "argv")
 	markerPath := filepath.Join(workDir, "marker")
 	prompt := fmt.Sprintf("literal $(touch %s)", markerPath)
@@ -197,13 +196,12 @@ func TestOSRunnerPassesPromptAsLiteralArgument(t *testing.T) {
 printf '%%s\n' "$@" > %s
 printf 'runner stdout\n'
 `, shellQuote(argvPath))
-	assertNoError(t, os.WriteFile(backendPath, []byte(script), 0o755))
 
 	var stdout bytes.Buffer
 	var stderr bytes.Buffer
 	err := OSRunner{}.Run(
 		context.Background(),
-		CommandSpec{Name: backendPath, Args: []string{"-p", prompt}},
+		shellCommand(script, "-p", prompt),
 		&stdout,
 		&stderr,
 	)
@@ -222,21 +220,17 @@ printf 'runner stdout\n'
 func TestOSRunnerPassesCommandEnvironment(t *testing.T) {
 	t.Parallel()
 
-	workDir := t.TempDir()
-	backendPath := filepath.Join(workDir, "backend")
 	script := `#!/bin/sh
 printf '%s\n' "$OPENCODE_DISABLE_EXTERNAL_SKILLS"
 `
-	assertNoError(t, os.WriteFile(backendPath, []byte(script), 0o755))
+	spec := shellCommand(script)
+	spec.Env = []string{"OPENCODE_DISABLE_EXTERNAL_SKILLS=1"}
 
 	var stdout bytes.Buffer
 	var stderr bytes.Buffer
 	err := OSRunner{}.Run(
 		context.Background(),
-		CommandSpec{
-			Name: backendPath,
-			Env:  []string{"OPENCODE_DISABLE_EXTERNAL_SKILLS=1"},
-		},
+		spec,
 		&stdout,
 		&stderr,
 	)
@@ -249,24 +243,22 @@ printf '%s\n' "$OPENCODE_DISABLE_EXTERNAL_SKILLS"
 func TestOSRunnerConvertsNonZeroExitToBackendExitError(t *testing.T) {
 	t.Parallel()
 
-	workDir := t.TempDir()
-	backendPath := filepath.Join(workDir, "backend")
 	script := `#!/bin/sh
 printf 'partial stdout\n'
 printf 'backend stderr\n' >&2
 exit 42
 `
-	assertNoError(t, os.WriteFile(backendPath, []byte(script), 0o755))
+	spec := shellCommand(script)
 
 	var stdout bytes.Buffer
 	var stderr bytes.Buffer
-	err := OSRunner{}.Run(context.Background(), CommandSpec{Name: backendPath}, &stdout, &stderr)
+	err := OSRunner{}.Run(context.Background(), spec, &stdout, &stderr)
 
 	var exitErr ExitError
 	if !errors.As(err, &exitErr) {
 		t.Fatalf("expected ExitError, got %T %[1]v", err)
 	}
-	assertEqual(t, exitErr.Backend, backendPath)
+	assertEqual(t, exitErr.Backend, spec.Name)
 	assertEqual(t, exitErr.Code, 42)
 	assertEqual(t, stdout.String(), "partial stdout\n")
 	assertEqual(t, stderr.String(), "backend stderr\n")
