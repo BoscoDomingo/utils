@@ -28,5 +28,3 @@ metadata:
 User: "Create a branch and push this with jj."
 
 Agent action: read the guide, translate "branch" to a bookmark workflow, inspect current state, ask for required approval before bookmark/push operations, then use built-in `jj` commands from the guide.
-
-Benchmark history: [benchmark-runs.md](./assets/benchmark-runs.md).

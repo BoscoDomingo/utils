@@ -7,14 +7,14 @@ metadata:
 
 # Update Documentation
 
-Analyze recent changes and update all affected documentation. Code is the source of truth; docs exist only to orient readers & agents and reduce onboarding cost.
+Analyse recent changes and update all affected documentation.
 
 ## Philosophy
 
-- **Concise over expressive.** Every line must justify its token cost.
+- **Concise > expressive.** Every line must justify its token cost.
 - **Point, don't duplicate.** Reference code locations instead of restating logic.
 - **Agent-friendly.** Keep doc files small so loading them into context is cheap.
-- **Additive only when necessary.** Prefer updating existing sections over creating new files.
+- **Additive-preferred.** Favour updating existing sections over creating new files.
 
 ## Workflow
 
@@ -34,13 +34,7 @@ git log --oneline $(git merge-base HEAD main 2>/dev/null || git merge-base HEAD 
 git status --short
 ```
 
-Also check for a plan file:
-
-```bash
-ls docs/plans/ 2>/dev/null
-```
-
-If a plan exists, read it for intended scope. If not, infer scope purely from the diff.
+Also check for plan file(s). If a plan exists, read it for intended scope. If not, infer scope purely from the diff.
 
 ### 2. Launch Sub-Agent
 
