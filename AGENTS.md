@@ -2,6 +2,8 @@ A personal collection of utilities, tools and scripts across various languages a
 
 This is NOT a monorepo — there is no unified build system. Each directory is self-contained with its own dependencies and tooling.
 
+Unless told otherwise, additions should be designed as reusable source artifacts that can be adapted across AI coding tools and harnesses.
+
 Refer to each directory's `AGENTS.md` (where present) for project-specific information. In case of conflict, the directory-specific information takes precedence.
 
 Refer to `./docs/` for further documentation about the project. This information is critical and MUST be kept up to date. It is your job to do that and/or aid the user to do so.
