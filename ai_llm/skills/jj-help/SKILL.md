@@ -1,6 +1,6 @@
 ---
 name: jj-help
-description: Use for Jujutsu (jj) version-control tasks, Git-to-jj translations, bookmarks, working-copy commits, revsets, or repos where jj is preferred.
+description: Use for Jujutsu (jj) version-control tasks, Git-to-jj translations, bookmarks, working-copy commits, revsets, workspaces (vs Git worktrees), or repos where jj is preferred.
 metadata:
   author: "@BoscoDomingo"
 ---
@@ -9,9 +9,10 @@ metadata:
 
 ## Use When
 
-- User mentions `jj`, Jujutsu, bookmarks, working-copy commits, revsets, or jj/git interop.
+- User mentions `jj`, Jujutsu, bookmarks, working-copy commits, revsets, workspaces, or jj/git interop.
 - Task involves version control in a repo where `jj` is preferred.
-- Prompt asks for Git-style branch, staging, pull, push, amend, rebase, or merge workflows that need jj translation.
+- Prompt asks for Git-style branch, staging, pull, push, amend, rebase, merge, or worktree workflows that need jj translation.
+- Task involves multiple working copies, parallel/agent sandboxes, or anything that looks like Git worktrees (use jj workspaces instead).
 
 ## Required Workflow
 
