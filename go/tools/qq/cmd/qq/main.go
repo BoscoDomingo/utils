@@ -1,7 +1,6 @@
 package main
 
 import (
-	"bytes"
 	"os"
 	"os/exec"
 
@@ -12,8 +11,8 @@ import (
 )
 
 func main() {
-	stdout := &bytes.Buffer{}
-	stderr := &bytes.Buffer{}
+	stdout := &countingWriter{writer: os.Stdout}
+	stderr := &countingWriter{writer: os.Stderr}
 	qqApp := appcore.New(appcore.AppOptions{
 		Stdout:       stdout,
 		Stderr:       stderr,
@@ -30,15 +29,27 @@ func main() {
 	cmd.SetArgs(args)
 	err := cmd.Execute()
 	if err != nil && stderr.Len() == 0 {
-		stderr.WriteString(err.Error())
-		stderr.WriteByte('\n')
+		_, _ = stderr.Write([]byte(err.Error() + "\n"))
 	}
 
-	_, _ = os.Stdout.Write(stdout.Bytes())
-	_, _ = os.Stderr.Write(stderr.Bytes())
 	if err != nil {
 		os.Exit(appcore.ExitCode(err))
 	}
+}
+
+type countingWriter struct {
+	writer *os.File
+	count  int
+}
+
+func (writer *countingWriter) Write(data []byte) (int, error) {
+	written, err := writer.writer.Write(data)
+	writer.count += written
+	return written, err
+}
+
+func (writer *countingWriter) Len() int {
+	return writer.count
 }
 
 func isTerminal(file *os.File) bool {

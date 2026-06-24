@@ -27,7 +27,7 @@ func TestArgsOnlyPromptDoesNotBlockOnOpenNonTTYStdin(t *testing.T) {
 	case result := <-done:
 		assertExitCode(t, result, 0)
 		assertEqual(t, app.runner.calls[0].spec.Name, "opencode")
-		assertStringSlicesEqual(t, app.runner.calls[0].spec.Args, []string{"run", "hello"})
+		assertStringSlicesEqual(t, app.runner.calls[0].spec.Args, []string{"run", expectedInlinePrompt("hello")})
 	case <-time.After(250 * time.Millisecond):
 		_ = reader.Close()
 		_ = writer.Close()
@@ -57,7 +57,7 @@ func TestArgsPromptSkipsPartialPipeStdinUntilWriterCloses(t *testing.T) {
 	case result := <-done:
 		assertExitCode(t, result, 0)
 		assertEqual(t, app.runner.calls[0].spec.Name, "opencode")
-		assertStringSlicesEqual(t, app.runner.calls[0].spec.Args, []string{"run", "summarize"})
+		assertStringSlicesEqual(t, app.runner.calls[0].spec.Args, []string{"run", expectedInlinePrompt("summarize")})
 	case <-time.After(250 * time.Millisecond):
 		_ = reader.Close()
 		_ = writer.Close()
@@ -88,7 +88,7 @@ func TestArgsPromptMergesImmediatelyAvailablePipeStdin(t *testing.T) {
 	assertStringSlicesEqual(
 		t,
 		app.runner.calls[0].spec.Args,
-		[]string{"run", "summarize\n\nContext:\n\ncontext\n"},
+		[]string{"run", expectedInlinePrompt("summarize\n\nContext:\n\ncontext\n")},
 	)
 }
 
@@ -121,7 +121,7 @@ func TestSelectorUsesInjectedBackendWithPipedPrompt(t *testing.T) {
 	assertExitCode(t, result, 0)
 	assertEqual(t, result.stdout, "answer from gemini\n")
 	assertEqual(t, app.runner.calls[0].spec.Name, "gemini")
-	assertStringSlicesEqual(t, app.runner.calls[0].spec.Args, []string{"-p", "hello\n"})
+	assertStringSlicesEqual(t, app.runner.calls[0].spec.Args, []string{"-p", expectedInlinePrompt("hello\n")})
 }
 
 func TestSelectorPromptDoesNotBlockOnOpenNonTTYStdin(t *testing.T) {
@@ -144,7 +144,7 @@ func TestSelectorPromptDoesNotBlockOnOpenNonTTYStdin(t *testing.T) {
 	case result := <-done:
 		assertExitCode(t, result, 0)
 		assertEqual(t, app.runner.calls[0].spec.Name, "gemini")
-		assertStringSlicesEqual(t, app.runner.calls[0].spec.Args, []string{"-p", "explain cobra"})
+		assertStringSlicesEqual(t, app.runner.calls[0].spec.Args, []string{"-p", expectedInlinePrompt("explain cobra")})
 	case <-time.After(250 * time.Millisecond):
 		_ = reader.Close()
 		_ = writer.Close()
@@ -155,7 +155,7 @@ func TestSelectorPromptDoesNotBlockOnOpenNonTTYStdin(t *testing.T) {
 func TestDefaultBackendPriorityUsesFirstInstalledBackend(t *testing.T) {
 	t.Parallel()
 
-	app := newTestApp(t, []string{"gemini", "pi"})
+	app := newTestApp(t, []string{"opencode", "gemini", "pi"})
 
 	result := app.execute(context.Background(), "hello")
 
@@ -191,7 +191,11 @@ func TestModelFlagPassesSelectorToBackend(t *testing.T) {
 	assertStringSlicesEqual(
 		t,
 		app.runner.calls[0].spec.Args,
-		[]string{"--model", "github-copilot/gpt-5.4-mini", "-p", "hello"},
+		[]string{
+			"--model", "github-copilot/gpt-5.4-mini",
+			"--append-system-prompt", "Be concise; prefer a single-line answer or command. Output only the command when that answers the question.",
+			"-p", "hello",
+		},
 	)
 }
 
@@ -213,13 +217,13 @@ func TestInstalledBackendNonZeroStopsWithoutFallback(t *testing.T) {
 	t.Parallel()
 
 	app := newTestApp(t, []string{"opencode", "pi"})
-	app.runner.exitCodes["opencode"] = 42
+	app.runner.exitCodes["pi"] = 42
 
 	result := app.execute(context.Background(), "hello")
 
 	assertExitCode(t, result, 42)
-	assertContains(t, result.stderr, "opencode failed")
-	assertBackendCalls(t, app.runner.calls, []string{"opencode"})
+	assertContains(t, result.stderr, "pi failed")
+	assertBackendCalls(t, app.runner.calls, []string{"pi"})
 }
 
 func TestSuccessOutputIsExactlyBackendStdout(t *testing.T) {

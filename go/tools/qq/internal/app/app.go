@@ -1,7 +1,6 @@
 package app
 
 import (
-	"bytes"
 	"context"
 	"fmt"
 	"io"
@@ -12,8 +11,8 @@ import (
 )
 
 type App struct {
-	stdout       *bytes.Buffer
-	stderr       *bytes.Buffer
+	stdout       io.Writer
+	stderr       io.Writer
 	stdin        io.Reader
 	stdinIsTTY   bool
 	ttyAvailable bool
@@ -65,11 +64,7 @@ func (app *App) Run(ctx context.Context, args []string) error {
 		)
 	}
 
-	var backendStdout bytes.Buffer
-	var backendStderr bytes.Buffer
-	err = app.runner.Run(ctx, spec, &backendStdout, &backendStderr)
-	app.stdout.Write(backendStdout.Bytes())
-	app.stderr.Write(backendStderr.Bytes())
+	err = app.runner.Run(ctx, spec, app.stdout, app.stderr)
 	if err != nil {
 		return err
 	}

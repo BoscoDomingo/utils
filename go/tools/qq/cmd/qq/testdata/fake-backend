@@ -18,7 +18,11 @@ if [ "${OPENCODE_DISABLE_EXTERNAL_SKILLS:-}" != "" ]; then
 	printf 'OPENCODE_DISABLE_EXTERNAL_SKILLS=%s\n' "$OPENCODE_DISABLE_EXTERNAL_SKILLS" >> "$env_file"
 fi
 
-if [ "${QQ_FAKE_STDOUT:-}" != "" ]; then
+if [ "${QQ_FAKE_STREAM_STDOUT:-}" != "" ]; then
+	printf 'stream first\n'
+	/bin/sleep "${QQ_FAKE_STREAM_DELAY:-1}"
+	printf 'stream second\n'
+elif [ "${QQ_FAKE_STDOUT:-}" != "" ]; then
 	printf '%s' "$QQ_FAKE_STDOUT"
 else
 	printf 'fake stdout from %s\n' "$backend_name"

@@ -202,6 +202,14 @@ func commandExitCode(t *testing.T, err error) int {
 	return 1
 }
 
+func expectedInlinePrompt(prompt string) string {
+	return "System: Be concise; prefer a single-line answer or command. Output only the command when that answers the question.\n\nUser: " + prompt
+}
+
+func conciseSystemPrompt() string {
+	return "Be concise; prefer a single-line answer or command. Output only the command when that answers the question."
+}
+
 func assertExitStatus(t *testing.T, result e2eResult, expected int) {
 	t.Helper()
 

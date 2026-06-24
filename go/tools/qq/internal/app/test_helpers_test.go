@@ -5,6 +5,7 @@ import (
 	"context"
 	"errors"
 	"fmt"
+	"io"
 	"os/exec"
 	"strings"
 	"testing"
@@ -21,6 +22,8 @@ type commandResult struct {
 
 type testApp struct {
 	*App
+	stdout   *bytes.Buffer
+	stderr   *bytes.Buffer
 	runner   *fakeRunner
 	selector *fakeSelector
 }
@@ -43,7 +46,7 @@ func newTestApp(t *testing.T, installed []string) *testApp {
 		Selector:     selector,
 	})
 
-	return &testApp{App: app, runner: runner, selector: selector}
+	return &testApp{App: app, stdout: stdout, stderr: stderr, runner: runner, selector: selector}
 }
 
 func (app *testApp) execute(ctx context.Context, args ...string) commandResult {
@@ -80,15 +83,15 @@ func newFakeRunner() *fakeRunner {
 func (runner *fakeRunner) Run(
 	_ context.Context,
 	spec backend.CommandSpec,
-	stdout *bytes.Buffer,
-	stderr *bytes.Buffer,
+	stdout io.Writer,
+	stderr io.Writer,
 ) error {
 	runner.calls = append(runner.calls, runnerCall{spec: spec})
 	output := runner.stdout[spec.Name]
 	if output == "" {
 		output = fmt.Sprintf("answer from %s\n", spec.Name)
 	}
-	stdout.WriteString(output)
+	_, _ = io.WriteString(stdout, output)
 
 	if code := runner.exitCodes[spec.Name]; code != 0 {
 		fmt.Fprintf(stderr, "%s failed\n", spec.Name)
@@ -127,6 +130,10 @@ func fakeLookPath(installed []string) func(string) (string, error) {
 		}
 		return "", exec.ErrNotFound
 	}
+}
+
+func expectedInlinePrompt(prompt string) string {
+	return "System: Be concise; prefer a single-line answer or command. Output only the command when that answers the question.\n\nUser: " + prompt
 }
 
 func assertExitCode(t *testing.T, result commandResult, expected int) {

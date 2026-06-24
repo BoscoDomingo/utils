@@ -4,6 +4,7 @@ import (
 	"bytes"
 	"context"
 	"fmt"
+	"io"
 	"os/exec"
 	"strings"
 	"testing"
@@ -20,28 +21,32 @@ type commandResult struct {
 }
 
 type testCommandApp struct {
-	app *appcore.App
+	app    *appcore.App
+	stdout *bytes.Buffer
+	stderr *bytes.Buffer
 }
 
 func newTestCommandApp(t *testing.T, installed []string) *testCommandApp {
 	t.Helper()
 
 	runner := newFakeRunner()
+	stdout := &bytes.Buffer{}
+	stderr := &bytes.Buffer{}
 	app := appcore.New(appcore.AppOptions{
-		Stdout:       &bytes.Buffer{},
-		Stderr:       &bytes.Buffer{},
+		Stdout:       stdout,
+		Stderr:       stderr,
 		StdinIsTTY:   true,
 		TTYAvailable: true,
 		LookPath:     fakeLookPath(installed),
 		Runner:       runner,
 	})
 
-	return &testCommandApp{app: app}
+	return &testCommandApp{app: app, stdout: stdout, stderr: stderr}
 }
 
 func (app *testCommandApp) execute(ctx context.Context, args ...string) commandResult {
-	app.app.Stdout().Reset()
-	app.app.Stderr().Reset()
+	app.stdout.Reset()
+	app.stderr.Reset()
 
 	cmd := New(app.app, args)
 	cmd.SetArgs(args)
@@ -49,8 +54,8 @@ func (app *testCommandApp) execute(ctx context.Context, args ...string) commandR
 
 	return commandResult{
 		code:   appcore.ExitCode(err),
-		stdout: app.app.Stdout().String(),
-		stderr: app.app.Stderr().String(),
+		stdout: app.stdout.String(),
+		stderr: app.stderr.String(),
 		err:    err,
 	}
 }
@@ -64,8 +69,8 @@ func newFakeRunner() *fakeRunner {
 func (runner *fakeRunner) Run(
 	_ context.Context,
 	spec backend.CommandSpec,
-	stdout *bytes.Buffer,
-	stderr *bytes.Buffer,
+	stdout io.Writer,
+	stderr io.Writer,
 ) error {
 	fmt.Fprintf(stdout, "answer from %s\n", spec.Name)
 	return nil

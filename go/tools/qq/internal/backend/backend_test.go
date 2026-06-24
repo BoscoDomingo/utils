@@ -15,17 +15,18 @@ func TestSupportedBackendsKeepPriorityAndDefaultArgv(t *testing.T) {
 	t.Parallel()
 
 	prompt := "hello"
+	inlinePrompt := promptWithConciseInstruction(prompt)
 	expected := []backendExpectation{
+		{name: "pi", args: []string{"--append-system-prompt", conciseSystemPrompt, "-p", prompt}},
 		{
 			name: "opencode",
-			args: []string{"run", prompt},
+			args: []string{"run", inlinePrompt},
 			env:  []string{"OPENCODE_DISABLE_EXTERNAL_SKILLS=1"},
 		},
-		{name: "pi", args: []string{"-p", prompt}},
-		{name: "codex", args: []string{"exec", "--ephemeral", prompt}},
-		{name: "claude", args: []string{"--safe-mode", "-p", prompt}},
-		{name: "agent", args: []string{"--mode", "ask", "-p", prompt}},
-		{name: "gemini", args: []string{"-p", prompt}},
+		{name: "codex", args: []string{"exec", "--ephemeral", inlinePrompt}},
+		{name: "claude", args: []string{"--safe-mode", "--append-system-prompt", conciseSystemPrompt, "-p", prompt}},
+		{name: "agent", args: []string{"--mode", "ask", "-p", inlinePrompt}},
+		{name: "gemini", args: []string{"-p", inlinePrompt}},
 	}
 
 	assertBackendsEqual(t, Supported(), expected, prompt, nil)
@@ -35,22 +36,23 @@ func TestSupportedBackendsRenderModelOverrides(t *testing.T) {
 	t.Parallel()
 
 	prompt := "literal $(echo bad)"
+	inlinePrompt := promptWithConciseInstruction(prompt)
 	model := &LLMInfo{
 		Provider: "github-copilot",
 		ID:       "gpt-5.5",
 		Raw:      "github-copilot/gpt-5.5",
 	}
 	expected := []backendExpectation{
+		{name: "pi", args: []string{"--model", model.Raw, "--append-system-prompt", conciseSystemPrompt, "-p", prompt}},
 		{
 			name: "opencode",
-			args: []string{"run", "--model", model.Raw, prompt},
+			args: []string{"run", "--model", model.Raw, inlinePrompt},
 			env:  []string{"OPENCODE_DISABLE_EXTERNAL_SKILLS=1"},
 		},
-		{name: "pi", args: []string{"--model", model.Raw, "-p", prompt}},
-		{name: "codex", args: []string{"exec", "--ephemeral", "--model", model.Raw, prompt}},
-		{name: "claude", args: []string{"--safe-mode", "--model", model.Raw, "-p", prompt}},
-		{name: "agent", args: []string{"--mode", "ask", "--model", model.Raw, "-p", prompt}},
-		{name: "gemini", args: []string{"--model", model.Raw, "-p", prompt}},
+		{name: "codex", args: []string{"exec", "--ephemeral", "--model", model.Raw, inlinePrompt}},
+		{name: "claude", args: []string{"--safe-mode", "--model", model.Raw, "--append-system-prompt", conciseSystemPrompt, "-p", prompt}},
+		{name: "agent", args: []string{"--mode", "ask", "--model", model.Raw, "-p", inlinePrompt}},
+		{name: "gemini", args: []string{"--model", model.Raw, "-p", inlinePrompt}},
 	}
 
 	assertBackendsEqual(t, Supported(), expected, prompt, model)
@@ -60,17 +62,18 @@ func TestDefaultModelPolicy(t *testing.T) {
 	t.Parallel()
 
 	prompt := "hello"
+	inlinePrompt := promptWithConciseInstruction(prompt)
 
 	tests := []struct {
 		name string
 		args []string
 	}{
-		{name: "opencode", args: []string{"run", prompt}},
-		{name: "pi", args: []string{"-p", prompt}},
-		{name: "codex", args: []string{"exec", "--ephemeral", prompt}},
-		{name: "claude", args: []string{"--safe-mode", "-p", prompt}},
-		{name: "agent", args: []string{"--mode", "ask", "-p", prompt}},
-		{name: "gemini", args: []string{"-p", prompt}},
+		{name: "opencode", args: []string{"run", inlinePrompt}},
+		{name: "pi", args: []string{"--append-system-prompt", conciseSystemPrompt, "-p", prompt}},
+		{name: "codex", args: []string{"exec", "--ephemeral", inlinePrompt}},
+		{name: "claude", args: []string{"--safe-mode", "--append-system-prompt", conciseSystemPrompt, "-p", prompt}},
+		{name: "agent", args: []string{"--mode", "ask", "-p", inlinePrompt}},
+		{name: "gemini", args: []string{"-p", inlinePrompt}},
 	}
 
 	for _, test := range tests {
@@ -119,7 +122,7 @@ func TestBackendArgsAndEnvReturnCopies(t *testing.T) {
 
 	freshBackend := backendByName(t, "opencode")
 
-	assertStringSlicesEqual(t, freshBackend.Args("hello", nil), []string{"run", "hello"})
+	assertStringSlicesEqual(t, freshBackend.Args("hello", nil), []string{"run", promptWithConciseInstruction("hello")})
 	assertStringSlicesEqual(t, freshBackend.Env(), []string{"OPENCODE_DISABLE_EXTERNAL_SKILLS=1"})
 }
 
@@ -154,7 +157,7 @@ func TestCommandForBackendReturnsCopies(t *testing.T) {
 	freshSpec, ok := CommandForBackend("opencode", "hello", nil)
 
 	assertEqual(t, ok, true)
-	assertStringSlicesEqual(t, freshSpec.Args, []string{"run", "hello"})
+	assertStringSlicesEqual(t, freshSpec.Args, []string{"run", promptWithConciseInstruction("hello")})
 	assertStringSlicesEqual(t, freshSpec.Env, []string{"OPENCODE_DISABLE_EXTERNAL_SKILLS=1"})
 }
 
@@ -176,11 +179,11 @@ func TestBackendSupportHelpers(t *testing.T) {
 	assertStringSlicesEqual(
 		t,
 		names,
-		[]string{"opencode", "pi", "codex", "claude", "agent", "gemini"},
+		[]string{"pi", "opencode", "codex", "claude", "agent", "gemini"},
 	)
 	assertEqual(t, IsSupported("opencode"), true)
 	assertEqual(t, IsSupported("missing"), false)
-	assertEqual(t, names[0], "opencode")
+	assertEqual(t, names[0], "pi")
 	assertEqual(t, names[len(names)-1], "gemini")
 	assertEqual(t, SupportedCSV(), strings.Join(append(names, "..."), ", "))
 }

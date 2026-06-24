@@ -1,7 +1,7 @@
 # qq specification
 
 `qq` is a terminal helper for quick AI-agent questions. It routes a prompt to a
-supported agent CLI, prints the answer on stdout, and avoids TUIs or disruptive
+supported agent CLI, streams the answer on stdout, and avoids TUIs or disruptive
 interactive flows in the default path.
 
 ## Context
@@ -40,16 +40,17 @@ Design intent:
 - Quick Q&A, not editing. Prefer safe/read-only/ask modes where a backend supports them.
 - Fixed first-class backend set and priority list for v1; no user config file.
 - Piping must work. The wrapper reads stdin and merges it into the final prompt.
-- Success output is backend stdout only. Wrapper diagnostics go to stderr.
+- Success output is backend stdout only, streamed as the backend writes it. Wrapper diagnostics go to stderr.
+- Answers should be concise by default; prefer a single-line command or answer.
 - Name is `qq`, not `q`, to avoid colliding with Amazon Q Developer CLI's `q` binary.
 
 ## Architecture
 
-Runtime is a Go CLI under `go/tools/qq` (`go install .` from this directory).
+Runtime is a Go CLI under `go/tools/qq/cmd/qq` (`go install ./cmd/qq` from the tool module root).
 
 | Layer                 | Responsibility                                                          |
 |-----------------------|-------------------------------------------------------------------------|
-| `main.go`             | Executable wiring for `go install .`                                    |
+| `cmd/qq/main.go`      | Executable wiring for `go install ./cmd/qq`                             |
 | `internal/cli`        | Cobra root command, flags, and shell completion generation              |
 | `internal/app`        | Orchestration: stdin handling, invocation parsing, and backend dispatch |
 | `internal/invocation` | Pure provider flag parsing and prompt construction                      |
@@ -71,16 +72,17 @@ Backend-specific environment overrides are set only when listed in
 
 | Topic                       | Decision                                                                                 |
 |-----------------------------|------------------------------------------------------------------------------------------|
-| Location                    | Self-contained under `go/tools/qq/`                                                      |
-| Distribution                | `go install github.com/BoscoDomingo/utils/go/tools/qq@latest` or `go install .` locally  |
-| Default backend selection   | First installed backend from fixed priority order                                        |
+| Location                    | Self-contained under `go/tools/qq/`                                                                 |
+| Distribution                | `go install github.com/BoscoDomingo/utils/go/tools/qq/cmd/qq@latest` or `go install ./cmd/qq` locally |
+| Default backend selection   | First installed backend from fixed priority order; Pi is first                           |
 | Explicit backend            | `-b`, `--backend`, `-p`, `--provider` flags                                              |
 | Explicit model selector     | `--model`, `-m` flags pass the exact selector string to the selected backend              |
 | Selector fallback           | When a provider flag is present but no backend value resolves, open interactive selector |
-| Success output              | Silent about backend choice; no wrapper banners on stdout                                |
+| Success output              | Stream backend stdout directly; no wrapper banners or backend names on stdout            |
 | Fallback on missing binary  | Try next backend only when `LookPath` fails for the executable name                      |
 | Fallback on backend failure | None. Installed backend non-zero exits stop immediately                                  |
 | Prompt merge separator      | Args, blank line, `Context:`, blank line, stdin                                          |
+| Answer style                | Backend prompts include a concise-answer instruction; exact argv mapping lives in source |
 | First-class backends        | Claude, Cursor Agent, OpenCode, Pi, Codex, and Gemini                                   |
 | Python                      | Not used by this tool                                                                    |
 
@@ -169,6 +171,10 @@ Shell completion may suggest backend names after provider flags, but runtime onl
 
 Empty args and empty stdin exit non-zero with concise usage on stderr.
 
+`qq` also adds a concise-answer instruction in `internal/backend/backend.go`.
+Backends with a native append-system-prompt flag receive it there; others receive
+an inline `System:` prelude inside the single prompt argument.
+
 ### Stdin handling
 
 Stdin behavior is safety-critical for scripting and automation.
@@ -219,12 +225,13 @@ equivalent in this contract, so `qq` does not claim to disable Cursor skills.
 7. No `eval` or shell-built command strings for prompt execution.
 8. If no supported backend binary is found, `qq` exits non-zero and lists supported backends on stderr.
 9. If a found backend exits non-zero, `qq` exits non-zero without trying lower-priority installed backends.
-10. Success output does not include wrapper banners, backend names, or progress text from the wrapper.
-11. No Python files are used by this tool.
-12. Provider flags select backends, open the selector when required, and reject unsupported explicit backends when prompt context exists.
-13. `--model` and `-m` pass the exact selector string to the chosen backend; no model flag means no model argv.
-14. Args-only invocations do not block on open or partially-filled stdin pipes.
-15. Shell completion generates scripts for `bash`, `zsh`, `fish`, and `powershell`; provider flags complete to supported backend names and the model flag avoids file completion.
+10. Success output streams backend stdout/stderr as it is written and does not include wrapper banners, backend names, or progress text from the wrapper.
+11. Backend invocations include the concise-answer instruction from `internal/backend/backend.go`.
+12. No Python files are used by this tool.
+13. Provider flags select backends, open the selector when required, and reject unsupported explicit backends when prompt context exists.
+14. `--model` and `-m` pass the exact selector string to the chosen backend; no model flag means no model argv.
+15. Args-only invocations do not block on open or partially-filled stdin pipes.
+16. Shell completion generates scripts for `bash`, `zsh`, `fish`, and `powershell`; provider flags complete to supported backend names and the model flag avoids file completion.
 
 ## Testing
 
@@ -253,9 +260,11 @@ Coverage includes:
 
 - Full priority order across the first-class backend set
 - Model override argv rendering, including no model argv when no override is supplied
+- Concise-answer instruction rendering, including native system-prompt flags and inline fallback
 - Args-only, stdin-only, and args+stdin prompt merge with exact `Context:` separator
 - Shell metacharacters passed literally (no shell execution side effects)
 - Missing-command fallback only; non-zero backend stops without fallback
+- Stdout streaming before backend process exit
 - Provider flag parser semantics and unsupported-backend errors
 - Optional stdin non-blocking behavior (open pipe, partial pipe with writer held open)
 - Completion registration for provider/backend flags
@@ -266,7 +275,7 @@ Verification:
 cd go/tools/qq
 go test -race ./...
 go vet ./...
-go install .
+go install ./cmd/qq
 ```
 
 Optional manual checks:
@@ -281,6 +290,7 @@ Optional manual checks:
 - **Model overrides**: `--model` and `-m` pass exact selector strings; no-override paths must not hard-code defaults.
 - **Prompt safety**: Pass prompt as argv; never interpolate into shell strings.
 - **stderr passthrough**: Do not suppress backend stderr unless the backend flag does.
+- **Output streaming**: Do not buffer backend stdout/stderr in the wrapper path.
 - **Long-tail CLIs**: Backends outside the first-class set are not supported by v1.
 - **Large stdin**: Read into memory in v1; not intended for huge files.
 - **Selector vs stdin**: Bubble Tea must use `/dev/tty`, not fd 0, so piped prompts remain available.

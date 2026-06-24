@@ -1,17 +1,21 @@
 package backend
 
 import (
-	"bytes"
 	"context"
 	"errors"
 	"fmt"
+	"io"
 	"os/exec"
 	"strings"
 )
 
 type backendName = string
 
-const promptPlaceholder = "{prompt}"
+const (
+	promptPlaceholder       = "{prompt}"
+	systemPromptPlaceholder = "{system_prompt}"
+	conciseSystemPrompt     = "Be concise; prefer a single-line answer or command. Output only the command when that answers the question."
+)
 
 // LLMInfo describes the backend-specific data for a model.
 type LLMInfo struct {
@@ -41,7 +45,7 @@ type CommandSpec struct {
 }
 
 type CommandRunner interface {
-	Run(context.Context, CommandSpec, *bytes.Buffer, *bytes.Buffer) error
+	Run(context.Context, CommandSpec, io.Writer, io.Writer) error
 }
 
 type ExitError struct {
@@ -58,8 +62,8 @@ type OSRunner struct{}
 func (runner OSRunner) Run(
 	ctx context.Context,
 	spec CommandSpec,
-	stdout *bytes.Buffer,
-	stderr *bytes.Buffer,
+	stdout io.Writer,
+	stderr io.Writer,
 ) error {
 	cmd := exec.CommandContext(ctx, string(spec.Name), spec.Args...)
 	cmd.Env = append(cmd.Environ(), spec.Env...)
@@ -80,8 +84,8 @@ func (runner OSRunner) Run(
 }
 
 var backendPriority = []backendName{
-	"opencode",
 	"pi",
+	"opencode",
 	"codex",
 	"claude",
 	"agent",
@@ -105,12 +109,20 @@ func (backend commandBackend) Name() backendName {
 }
 
 func (backend commandBackend) Args(prompt string, model *LLMInfo) []string {
-	args := renderPrompt(backend.template.Args, prompt)
+	args := renderTemplate(backend.template.Args, backend.promptArg(prompt), conciseSystemPrompt)
 	if model == nil || model.Raw == "" || backend.template.ModelArgs == nil {
 		return args
 	}
 
 	return backend.template.ModelArgs(args, model)
+}
+
+func (backend commandBackend) promptArg(prompt string) string {
+	if templateContains(backend.template.Args, systemPromptPlaceholder) {
+		return prompt
+	}
+
+	return promptWithConciseInstruction(prompt)
 }
 
 func (backend commandBackend) Env() []string {
@@ -125,7 +137,10 @@ var supportedBackends = map[backendName]commandTemplate{
 		ModelListArgs: []string{"models"},
 	},
 	"pi": {
-		Args:          []string{"-p", promptPlaceholder},
+		Args: []string{
+			"--append-system-prompt", systemPromptPlaceholder,
+			"-p", promptPlaceholder,
+		},
 		ModelArgs:     insertModelArgs(0),
 		ModelListArgs: []string{"--list-models"},
 	},
@@ -134,7 +149,11 @@ var supportedBackends = map[backendName]commandTemplate{
 		ModelArgs: insertModelArgs(2),
 	},
 	"claude": {
-		Args:      []string{"--safe-mode", "-p", promptPlaceholder},
+		Args: []string{
+			"--safe-mode",
+			"--append-system-prompt", systemPromptPlaceholder,
+			"-p", promptPlaceholder,
+		},
 		ModelArgs: insertModelArgs(1),
 	},
 	"agent": {
@@ -196,16 +215,32 @@ func SupportedCSV() string {
 	return strings.Join(parts, ", ")
 }
 
-func renderPrompt(template []string, prompt string) []string {
+func renderTemplate(template []string, prompt string, systemPrompt string) []string {
 	args := make([]string, len(template))
 	for index, arg := range template {
-		if arg == promptPlaceholder {
+		switch arg {
+		case promptPlaceholder:
 			args[index] = prompt
-			continue
+		case systemPromptPlaceholder:
+			args[index] = systemPrompt
+		default:
+			args[index] = arg
 		}
-		args[index] = arg
 	}
 	return args
+}
+
+func templateContains(template []string, value string) bool {
+	for _, arg := range template {
+		if arg == value {
+			return true
+		}
+	}
+	return false
+}
+
+func promptWithConciseInstruction(prompt string) string {
+	return fmt.Sprintf("System: %s\n\nUser: %s", conciseSystemPrompt, prompt)
 }
 
 func insertModelArgs(index int) func([]string, *LLMInfo) []string {

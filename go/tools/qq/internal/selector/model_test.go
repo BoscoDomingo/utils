@@ -23,7 +23,7 @@ func TestModelEnterSelectsFocusedBackend(t *testing.T) {
 		tea.KeyPressMsg(tea.Key{Code: tea.KeyEnter}),
 	)
 
-	assertEqual(t, model.selected, "opencode")
+	assertEqual(t, model.selected, "pi")
 	assertEqual(t, model.cancelled, false)
 	assertQuitCommand(t, cmd)
 }

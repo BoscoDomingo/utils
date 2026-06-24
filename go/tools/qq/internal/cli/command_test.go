@@ -45,7 +45,7 @@ func TestBackendFlagCompletionUsesSupportedBackendList(t *testing.T) {
 	assertEqual(
 		t,
 		strings.Join(completionItems(result.stdout), "\n"),
-		"opencode\npi\ncodex\nclaude\nagent\ngemini",
+		"pi\nopencode\ncodex\nclaude\nagent\ngemini",
 	)
 	assertContains(t, result.stdout, ":4")
 }

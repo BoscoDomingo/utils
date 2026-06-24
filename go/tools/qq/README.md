@@ -1,6 +1,6 @@
 # qq
 
-`qq` is a small terminal helper for quick AI-agent questions.
+`qq` is a small terminal helper for quick AI-agent questions. It streams backend output and nudges answers toward a single concise line.
 
 ```sh
 # directly
@@ -48,12 +48,12 @@ I'm on and adapt to each tool's idiosyncrasies. Hence why I wrote this.
 Install it with Go:
 
 ```bash
-go install github.com/BoscoDomingo/utils/go/tools/qq@latest
+go install github.com/BoscoDomingo/utils/go/tools/qq/cmd/qq@latest
 
 # from source checkout
 git clone https://github.com/BoscoDomingo/utils.git
 cd utils/go/tools/qq
-go install .
+go install ./cmd/qq
 ```
 
 ## Usage
@@ -68,8 +68,8 @@ qq --provider claude --model claude-sonnet-4 "explain this command"
 qq -b pi -m github-copilot/gpt-5.5 "reply with OK"
 ```
 
-First-class backends are `claude`, `agent` (Cursor Agent), `opencode`, `pi`,
-`codex`, and `gemini`. Backend priority and argv mappings live in
+First-class backends are `pi`, `opencode`, `codex`, `claude`, `agent` (Cursor Agent),
+and `gemini`. Backend priority and argv mappings live in
 [`internal/backend/backend.go`](internal/backend/backend.go); treat that source
 as authoritative when behavior and docs differ.
 
@@ -147,6 +147,10 @@ Where a backend exposes a supported non-interactive skill-suppression control,
 `qq` applies it in the backend mapping. Backends without such a control still
 run with the safest documented non-interactive/ask-style argv known to `qq`.
 
+`qq` also applies a concise-answer instruction in the backend mapping. Backends
+with native append-system-prompt support use that; others get an inline `System:`
+prelude in the single prompt argument.
+
 Automated tests are split by scope:
 
 - root E2E tests use fake backend executables under `testdata`
@@ -160,7 +164,7 @@ Run the full local check before changing behavior:
 ```bash
 go test -race ./...
 go vet ./...
-go install .
+go install ./cmd/qq
 ```
 
 Run real-backend smoke checks explicitly when you want to verify local backend

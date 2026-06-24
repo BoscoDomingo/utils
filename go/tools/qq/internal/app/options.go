@@ -15,8 +15,8 @@ type BackendSelector interface {
 }
 
 type AppOptions struct {
-	Stdout       *bytes.Buffer
-	Stderr       *bytes.Buffer
+	Stdout       io.Writer
+	Stderr       io.Writer
 	Stdin        io.Reader
 	StdinIsTTY   bool
 	TTYAvailable bool
@@ -54,10 +54,10 @@ func New(options AppOptions) *App {
 	}
 }
 
-func (app *App) Stdout() *bytes.Buffer {
+func (app *App) Stdout() io.Writer {
 	return app.stdout
 }
 
-func (app *App) Stderr() *bytes.Buffer {
+func (app *App) Stderr() io.Writer {
 	return app.stderr
 }
