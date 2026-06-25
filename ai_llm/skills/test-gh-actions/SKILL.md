@@ -1,16 +1,12 @@
 ---
 name: test-gh-actions
 description: Run GitHub Actions workflows locally with `act`. Discovers workflows, confirms selection with the user, then executes. Use when a change has been implemented that requires passing CI checks or when the user asks to test CI, validate a workflow, or run GitHub Actions locally.
-compatibility: requires `act` (https://nektosact.com) and Docker
+compatibility: requires `act` (https://nektosact.com) and `docker`
 metadata:
   author: "@BoscoDomingo"
 ---
 
 # Test GitHub Actions Locally
-
-Run GitHub Actions workflows locally using [`act`](https://nektosact.com) without pushing to the remote.
-
----
 
 ## When to Use
 
@@ -19,17 +15,29 @@ Run GitHub Actions workflows locally using [`act`](https://nektosact.com) withou
 - User wants to debug a failing GitHub Actions workflow
 - After finishing a task where the code will have to pass CI checks
 
----
-
 ## Prerequisites
 
-Verify `act` is available:
+`act` ships in two officially supported forms — pick whichever is available:
 
 ```bash
-which act
+# Prefer the standalone binary; fall back to the gh CLI extension.
+if command -v act >/dev/null 2>&1; then
+  ACT_CMD="act"
+elif gh act --version >/dev/null 2>&1; then
+  ACT_CMD="gh act"
+else
+  ACT_CMD=""
+fi
 ```
 
-If `act` is not found, **stop immediately** and tell the user to install it from <https://github.com/nektos/act>. Do NOT attempt to install it.
+If `ACT_CMD` is empty, **stop immediately** and tell the user to install one of:
+
+- Standalone binary: <https://github.com/nektos/act>
+- GitHub CLI extension: install [GitHub CLI](https://cli.github.com/) first if you don't already have `gh`, then run `gh extension install nektos/gh-act` (see <https://github.com/nektos/gh-act>)
+
+Do NOT attempt to install either yourself.
+
+Use `$ACT_CMD` (the chosen invocation) in every example below — the flags are identical between the two forms.
 
 Verify Docker is running:
 
@@ -69,26 +77,29 @@ Rank by relevance:
 
 Present the summary table and ask the user which workflow(s) and/or job(s) to run. Default suggestion: all workflows from tier 1 above. If only one workflow exists, still confirm before running.
 
-In Cursor, use `AskQuestion` to present the choices. In Claude Code, ask inline. Use similar tools for other agents.
+Use `AskQuestion`, `AskUserQuestion` or similar tools to present the choices.
 
 ### Step 4 -- Run
 
-For each confirmed workflow, determine the event to simulate (use the first trigger in the `on:` list, preferring `push`).
+For each confirmed workflow, determine the event to simulate (use the first trigger in the `on:` list, preferring `pull_request`).
+
+`$ACT_CMD` below is the invocation chosen in Prerequisites (either `act` or `gh act`).
 
 ```bash
-act <event> -W .github/workflows/<file>
+$ACT_CMD <event> -W .github/workflows/<file>
 ```
 
 If the user selected specific jobs rather than full workflows:
 
 ```bash
-act <event> -W .github/workflows/<file> -j <job_name>
+$ACT_CMD <event> -W .github/workflows/<file> -j <job_name>
 ```
 
-If a `.secrets` or `.env` file exists at the repo root, pass it:
+If a `.secrets` or `.env` file exists at the repo root, pass each via its matching flag (`--secret-file` for secrets, `--env-file` for environment variables):
 
 ```bash
-act <event> -W .github/workflows/<file> --secret-file .secrets
+# Include only the flags whose corresponding file actually exists at the repo root.
+$ACT_CMD <event> -W .github/workflows/<file> --secret-file .secrets --env-file .env
 ```
 
 If `act` prompts for a Docker image size on first run, choose `Medium` unless the user specifies otherwise.
