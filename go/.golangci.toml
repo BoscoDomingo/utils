@@ -1,0 +1,29 @@
+# https://golangci-lint.run/docs/configuration/file/
+version = "2"
+
+[run]
+timeout = "5m"
+tests = true
+allow-parallel-runners = true
+allow-serial-runners = true
+
+[linters]
+default = "standard"
+enable = ["errcheck", "govet", "ineffassign", "staticcheck", "unused"]
+
+[formatters]
+enable = ["gofmt", "gofumpt", "goimports", "golines"]
+
+[formatters.settings.golines]
+tab-len = 2
+max-len = 120
+
+[formatters.settings.gofmt]
+rewrite-rules = [
+  { pattern = "interface{}", replacement = "any" },
+  { pattern = "a[b:len(a)]", replacement = "a[b:]" },
+]
+
+[issues]
+# new-from-merge-base = "main" # Uncomment for CI so only the changes since the base ref are checked
+fix = true # Comment for CI so no changes are autofixed
