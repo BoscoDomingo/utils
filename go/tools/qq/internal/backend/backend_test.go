@@ -50,7 +50,10 @@ func TestSupportedBackendsRenderModelOverrides(t *testing.T) {
 			env:  []string{"OPENCODE_DISABLE_EXTERNAL_SKILLS=1"},
 		},
 		{name: "codex", args: []string{"exec", "--ephemeral", "--model", model.Raw, inlinePrompt}},
-		{name: "claude", args: []string{"--safe-mode", "--model", model.Raw, "--append-system-prompt", conciseSystemPrompt, "-p", prompt}},
+		{
+			name: "claude",
+			args: []string{"--safe-mode", "--model", model.Raw, "--append-system-prompt", conciseSystemPrompt, "-p", prompt},
+		},
 		{name: "agent", args: []string{"--mode", "ask", "--model", model.Raw, "-p", inlinePrompt}},
 		{name: "gemini", args: []string{"--model", model.Raw, "-p", inlinePrompt}},
 	}

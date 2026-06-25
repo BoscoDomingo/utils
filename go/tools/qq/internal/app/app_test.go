@@ -192,9 +192,12 @@ func TestModelFlagPassesSelectorToBackend(t *testing.T) {
 		t,
 		app.runner.calls[0].spec.Args,
 		[]string{
-			"--model", "github-copilot/gpt-5.4-mini",
-			"--append-system-prompt", "Be concise; prefer a single-line answer or command. Output only the command when that answers the question.",
-			"-p", "hello",
+			"--model",
+			"github-copilot/gpt-5.4-mini",
+			"--append-system-prompt",
+			"Be concise; prefer a single-line answer or command. Output only the command when that answers the question.",
+			"-p",
+			"hello",
 		},
 	)
 }

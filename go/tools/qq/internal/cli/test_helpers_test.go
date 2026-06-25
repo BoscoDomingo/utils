@@ -11,6 +11,8 @@ import (
 
 	appcore "github.com/BoscoDomingo/utils/go/tools/qq/internal/app"
 	"github.com/BoscoDomingo/utils/go/tools/qq/internal/backend"
+	"github.com/spf13/cobra"
+	"github.com/spf13/pflag"
 )
 
 type commandResult struct {
@@ -119,4 +121,14 @@ func assertEqual[T comparable](t *testing.T, got T, want T) {
 	if got != want {
 		t.Fatalf("got %v, want %v", got, want)
 	}
+}
+
+func requireFlag(t *testing.T, cmd *cobra.Command, name string) *pflag.Flag {
+	t.Helper()
+
+	flag := cmd.Flags().Lookup(name)
+	if flag == nil {
+		t.Fatalf("missing %s flag", name)
+	}
+	return flag
 }

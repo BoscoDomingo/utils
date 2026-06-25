@@ -83,10 +83,7 @@ func TestBackendFlagsUseSelectorSentinelNoOptDefault(t *testing.T) {
 	cmd := New(newTestCommandApp(t, nil).app, nil)
 
 	for _, name := range []string{"backend", "provider"} {
-		flag := cmd.Flags().Lookup(name)
-		if flag == nil {
-			t.Fatalf("missing %s flag", name)
-		}
+		flag := requireFlag(t, cmd, name)
 		assertEqual(t, flag.NoOptDefVal, selectorFlagValue)
 	}
 }
@@ -96,10 +93,7 @@ func TestModelFlagIsRegistered(t *testing.T) {
 
 	cmd := New(newTestCommandApp(t, nil).app, nil)
 
-	flag := cmd.Flags().Lookup("model")
-	if flag == nil {
-		t.Fatal("missing model flag")
-	}
+	flag := requireFlag(t, cmd, "model")
 	assertEqual(t, flag.Shorthand, "m")
 	assertEqual(t, flag.NoOptDefVal, "")
 }
