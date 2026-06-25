@@ -72,7 +72,7 @@ func (runner *fakeRunner) Run(
 	stdout io.Writer,
 	stderr io.Writer,
 ) error {
-	fmt.Fprintf(stdout, "answer from %s\n", spec.Name)
+	_, _ = fmt.Fprintf(stdout, "answer from %s\n", spec.Name)
 	return nil
 }
 

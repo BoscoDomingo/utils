@@ -47,6 +47,6 @@ func (app *App) printNoBackendError() error {
 }
 
 func (app *App) printError(code int, message string) error {
-	fmt.Fprintln(app.stderr, message)
+	_, _ = fmt.Fprintln(app.stderr, message)
 	return appError{code: code, message: message}
 }

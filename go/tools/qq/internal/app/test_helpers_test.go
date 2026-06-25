@@ -94,7 +94,7 @@ func (runner *fakeRunner) Run(
 	_, _ = io.WriteString(stdout, output)
 
 	if code := runner.exitCodes[spec.Name]; code != 0 {
-		fmt.Fprintf(stderr, "%s failed\n", spec.Name)
+		_, _ = fmt.Fprintf(stderr, "%s failed\n", spec.Name)
 		return backend.ExitError{Backend: spec.Name, Code: code}
 	}
 
