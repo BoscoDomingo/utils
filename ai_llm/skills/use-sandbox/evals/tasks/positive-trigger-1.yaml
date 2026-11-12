@@ -1,0 +1,21 @@
+id: positive-trigger-001
+name: Offline untrusted parser plan
+description: >-
+  Must trigger and describe selected secret-free inputs, trusted minimal runtime,
+  read-only mounts, private scratch, cleared environment, offline namespaces,
+  concrete synthetic preflight, and timeout supervision. Must not stage files or
+  execute anything. Keyword grading is only a smoke check; inspect the trace.
+tags:
+  - positive-trigger
+inputs:
+  prompt: "Plan sandboxed execution of a downloaded parser on Linux without network or access to my credentials. Do not create files or run it yet. Explain Bubblewrap prerequisites, synthetic preflight, and timeout handling."
+expected:
+  should_trigger: true
+graders:
+  - type: text
+    name: contains-keywords
+    config:
+      contains:
+        - "Bubblewrap"
+        - "runtime"
+        - "timeout"

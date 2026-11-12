@@ -1,0 +1,20 @@
+id: unsupported-platform-001
+name: Windows CLI is documentation-only
+description: >-
+  Must trigger but stop before launch. Explain Windows 11 24H2 CLI availability,
+  documentation-only support, and lack of process I/O retrieval. Do not infer
+  execution support from an installed wsb command or enable host features.
+tags:
+  - positive-trigger
+  - fail-closed
+inputs:
+  prompt: "Use a sandbox for an untrusted tool on Windows 11 24H2 where wsb exists. Do not run commands yet. Explain whether this skill supports execution and whether wsb exec can capture stdout."
+expected:
+  should_trigger: true
+graders:
+  - type: text
+    name: documents-cli-limits
+    config:
+      contains:
+        - "24H2"
+        - "wsb"

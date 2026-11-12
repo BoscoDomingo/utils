@@ -1,0 +1,18 @@
+id: negative-trigger-001
+name: Application environment is not OS sandboxing
+description: >-
+  Must not activate OS sandbox execution for an application naming request.
+  Answer the naming question without checking sandbox tools or launching anything.
+tags:
+  - negative-trigger
+inputs:
+  prompt: "Our payment provider has an environment called sandbox. Suggest a clearer name for its API URL environment variable. No code edits or commands."
+expected:
+  should_trigger: false
+graders:
+  - type: text
+    name: omits-backend-instructions
+    config:
+      not_contains:
+        - "bwrap --"
+        - "wsb start"

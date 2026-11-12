@@ -1,0 +1,18 @@
+id: negative-trigger-002
+name: Conceptual sandbox explanation
+description: >-
+  Must not activate execution for a conceptual JavaScript question or inspect
+  OS sandbox tools. Explain the concept without commands or file changes.
+tags:
+  - negative-trigger
+inputs:
+  prompt: "Explain what a JavaScript sandbox means in a browser. This is a conceptual question, not a request to run code."
+expected:
+  should_trigger: false
+graders:
+  - type: text
+    name: omits-launch-instructions
+    config:
+      not_contains:
+        - "bwrap --"
+        - "wsb start"
