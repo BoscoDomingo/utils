@@ -1,6 +1,12 @@
-id: workspace-recovery-001
+id: jj-workspaces-recovery-001
 name: Reuse By Request and Partial Creation
-description: Dry-run explicit reuse; manually review active work, cleanliness checks, and refusal to repair.
+description: >-
+  Dry-run explicit reuse. Must ask about active users/jobs and filesystem work
+  on copy-1; recorded emptiness alone is insufficient. Any snapshot needs
+  approval with automatic stale recovery disabled. Must stop and ask on copy-2
+  and copy-3 without repairing or moving them. Reuse copy-4 only after
+  verification, without repositioning. Leave partial creation intact and report
+  recovery needs; no automatic cleanup or silent fresh substitution.
 tags:
   - positive-trigger
 inputs:
@@ -11,22 +17,17 @@ inputs:
     different base with unbookmarked work. copy-4 is confirmed inactive and clean,
     undescribed, conflict-free, non-divergent, directly above BASE, with no
     references, descendants, or other workspace sharing @; path/repository,
-    sparse patterns and colocation match. Separately, approved fresh creation
-    fails after leaving a .jj directory and registration.
-    Expected behavior: ask about active users/jobs and filesystem work on copy-1;
-    recorded emptiness alone is insufficient. Require approval for any snapshot
-    and disable auto-update-stale. Stop and ask on copy-2/copy-3, do not repair or
-    move them. Reuse copy-4 only after verification, without repositioning. Leave
-    partial creation intact and report recovery needs; no automatic cleanup,
-    silent fresh substitution, or ownership/locking protocol.
+    sparse patterns and colocation match. Separately, a fresh creation the user
+    allowed fails after leaving a .jj directory and registration.
 expected:
   should_trigger: true
 graders:
   - type: text
-    name: contains-keywords
+    name: verifies-before-reuse
     config:
       contains:
-        - "stale"
-        - "active"
-        - "approval"
-        - "copy-4"
+        - "snapshot"
+        - "approv"
+        - "recover"
+      not_contains:
+        - "rm -rf"

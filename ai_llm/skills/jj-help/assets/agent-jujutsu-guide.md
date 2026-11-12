@@ -325,26 +325,13 @@ jj log
 
 ### Create A Workspace
 
-Workspaces should be created as siblings of the main repo directory, not nested inside it (nesting creates a confusing repo-inside-a-repo). Run `jj new` first so the new workspace starts from a shared parent.
+Workspaces should be created as siblings of the main repo directory, not nested inside it (nesting creates a confusing repo-inside-a-repo). Always pass an explicit base with `-r`; do not run `jj new` in the current workspace first. For the full agent workflow, use the `use-jj-workspaces` skill when available.
 
 ```sh
-jj new
-jj workspace add ../feature-x
+jj workspace add --name feature-x -r <rev> ../feature-x
 ```
 
-Name it explicitly (defaults to the destination directory's basename):
-
-```sh
-jj workspace add --name feature-x ../feature-x
-```
-
-Control the new workspace's parent revision(s):
-
-```sh
-jj workspace add -r <rev> ../feature-x
-```
-
-With no `-r`, the new workspace's working-copy commit shares the same parent(s) as the current workspace's working-copy commit. With one or more `-r`, it is created as if you had run `jj new r1 r2 ...`.
+`--name` defaults to the destination directory's basename. With `-r`, the new working-copy commit is created as if you had run `jj new <rev>`. Without `-r`, it shares the current working-copy commit's parent(s), silently excluding work in the current `@`. To include uncommitted work, commit it first and use the resulting commit (e.g. `-r @-`), never the live `@`.
 
 Control sparse patterns with `--sparse-patterns copy|full|empty` (default `copy`, inherits the current workspace's patterns).
 
@@ -573,8 +560,7 @@ jj git push -b <bookmark>
 Spin up a parallel working copy (workspace) for concurrent/agent work in a jj-managed repo:
 
 ```sh
-jj new
-jj workspace add ../feature-x
+jj workspace add --name feature-x -r <rev> ../feature-x
 cd ../feature-x
 # ...work, then bring it back onto the main line with jj rebase, then:
 jj workspace forget feature-x
@@ -601,7 +587,7 @@ If you are already in a Git linked worktree, do not run this workflow; stay with
 | `git push`                 | `jj git push`                                        |
 | `git rebase`               | `jj rebase`                                          |
 | `git merge main`           | `jj new main @`                                      |
-| `git worktree add <path>`  | `jj workspace add <path>` only in jj-managed repos; if already in a Git worktree, stay with Git |
+| `git worktree add <path>`  | `jj workspace add -r <rev> <path>` only in jj-managed repos; if already in a Git worktree, stay with Git |
 | `git worktree list`        | `jj workspace list` for jj workspaces; `git worktree list` for Git worktrees |
 | `git worktree remove`      | `jj workspace forget <name>` + `rm -r <path>` for jj workspaces; use Git for Git worktrees |
 
