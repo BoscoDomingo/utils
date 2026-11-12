@@ -1,4 +1,4 @@
-id: negative-trigger-001
+id: jj-workspaces-negative-trigger-001
 name: Unrelated Request
 description: A coffee joke should not trigger workspace setup.
 tags:

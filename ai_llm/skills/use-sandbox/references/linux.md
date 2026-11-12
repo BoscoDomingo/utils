@@ -49,7 +49,7 @@ Only with fixture/launch approval, use a trusted probe from the runtime and the 
 
 - Read a synthetic staged file with known bytes; its append attempt must fail. A host-readable synthetic canary outside every source mount must be unreadable inside. Compare both host checksums before/after.
 - Set a synthetic host token without `--setenv`; confirm it is absent inside. Check the reviewed guest environment allowlist, allowing expected bookkeeping such as `PWD`, but no credential/service variables.
-- Compare host and guest `/proc/self/ns/{mnt,user,pid,net}` identifiers; each must differ. Guest `/proc/net/dev` may show only loopback, and `/proc/net/route` no non-loopback route.
+- Compare host and guest `/proc/self/ns/{mnt,user,pid,net,ipc,uts}` identifiers; each must differ. Guest `/proc/net/dev` may show only loopback, and `/proc/net/route` no non-loopback route.
 - Write/reread synthetic files in each scratch/home path and, if enabled, `/out`; confirm the output reaches only its approved host directory. Inspect mounts and descriptors for unintended access or forwarded sockets.
 
 Missing tools, incomplete results, namespace denial, successful input writes, or changed checksums block execution. This checks configuration, not all escapes or end-to-end connectivity denial.

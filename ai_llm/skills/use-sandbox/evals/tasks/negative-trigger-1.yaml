@@ -1,4 +1,4 @@
-id: negative-trigger-001
+id: sandbox-negative-trigger-001
 name: Application environment is not OS sandboxing
 description: >-
   Must not activate OS sandbox execution for an application naming request.
