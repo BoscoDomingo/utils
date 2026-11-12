@@ -1,0 +1,25 @@
+id: preflight-and-output-001
+name: Concrete probes and bounded results
+description: >-
+  Must trigger and explain that trusted synthetic preflight is a configuration
+  check, not proof of isolation or a claim of integration testing. Explain input/canary checksums,
+  cleared synthetic token, namespace comparisons, private scratch, and explicit
+  output mount approval. A writable input probe or inconclusive result blocks
+  execution. Require bounded logs, timeout/descendant cleanup, and inspection of
+  exports without following symlinks or running executables. Do not claim tests
+  passed or launch anything. Text checks are smoke checks only.
+tags:
+  - positive-trigger
+  - fail-closed
+inputs:
+  prompt: "Plan only: how would you preflight an offline Bubblewrap task that needs exported files, then handle huge stdout and timeout? Include synthetic checksum probes, what happens if an input write succeeds, and how preflight differs from integration tests. Do not create files, launch a sandbox, or claim verification passed."
+expected:
+  should_trigger: true
+graders:
+  - type: text
+    name: addresses-verification-and-lifecycle
+    config:
+      contains:
+        - "checksum"
+        - "timeout"
+        - "integration"
