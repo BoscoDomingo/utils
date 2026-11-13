@@ -1,7 +1,5 @@
 # Jujutsu Quick Guide
 
-Use Jujutsu (`jj`) for version control when it is available.
-
 This guide is meant for agents that know Git better than Jujutsu. Use built-in `jj` commands, not local aliases.
 
 Commands and behavior in this guide are verified against jj 0.47.1.
