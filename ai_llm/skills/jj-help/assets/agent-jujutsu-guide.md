@@ -18,7 +18,7 @@ Commands and behavior in this guide are verified against jj 0.47.1.
 
 ## Safety Rules
 
-- First check whether the current directory is a Git worktree that jj did not create. If it is, follow the Git Worktree Exception below.
+- First check whether the current directory is a linked Git worktree that jj did not create. If it is, follow the Git Worktree Exception below.
 - Prefer read-only inspection first: `jj status`, `jj diff`, `jj show`, `jj log`.
 - Do not run `git checkout -b`, `git switch -c`, `git pull`, or `git push` unless you are in the Git Worktree Exception.
 - Use `jj git fetch` instead of `git pull`.
@@ -30,7 +30,7 @@ Commands and behavior in this guide are verified against jj 0.47.1.
 
 ## Git Worktree Exception
 
-In a Git worktree that jj did not create (for example, one made with `git worktree add`), DO NOT use `jj`. Use conservative/basic Git commands instead.
+In a linked Git worktree that jj did not create (for example, one made with `git worktree add`), DO NOT use `jj`. Use conservative/basic Git commands instead.
 
 Detect a linked Git worktree with read-only Git inspection:
 
