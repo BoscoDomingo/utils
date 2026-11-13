@@ -1,6 +1,6 @@
 # Jujutsu Quick Guide
 
-This guide is meant for agents that know Git better than Jujutsu. Use built-in `jj` commands, not local aliases.
+Use built-in `jj` commands, not local aliases.
 
 Commands and behavior in this guide are verified against jj 0.47.1.
 
