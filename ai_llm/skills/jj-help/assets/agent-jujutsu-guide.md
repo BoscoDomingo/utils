@@ -56,7 +56,7 @@ test -d "$(git rev-parse --show-toplevel)/.jj" && echo jj || echo git
 
 Do not use `jj workspace root` for this check; inside a nested Git worktree it reports the parent jj repo.
 
-When using Git there:
+If the check prints `git`:
 
 - Inspect with `git status --short --branch`, `git diff`, `git log --oneline --decorate -n 20`, and `git branch --show-current`.
 - Commit with normal Git staging and commit commands (`git add`, `git commit`) if approval policy allows.
