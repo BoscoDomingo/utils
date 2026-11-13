@@ -4,6 +4,8 @@ Use Jujutsu (`jj`) for version control when it is available, except when the cur
 
 This guide is meant for agents that know Git better than Jujutsu. Use built-in `jj` commands, not local aliases.
 
+Commands and behavior in this guide are verified against jj 0.47.1.
+
 ## Mental Model
 
 - `jj` can use a Git repository as storage, but it has its own commit model and commands.
@@ -92,6 +94,8 @@ jj git fetch
 ```
 
 Do not use `git pull`. In `jj`, fetch remote state first, then inspect/rebase/bookmark as needed.
+
+`jj git fetch` can change local history. If the remote rewrote commits that keep their change IDs, jj rebases your mutable local descendants onto the rewritten commits. Inspect `jj log` after a fetch.
 
 ## Commit Current Work
 
@@ -242,32 +246,34 @@ These commands move the working copy and may leave changes behind in commits. As
 Move only the current revision:
 
 ```sh
-jj rebase -r @ -d <destination>
+jj rebase -r @ -o <destination>
 ```
 
 Move a whole branch/stack:
 
 ```sh
-jj rebase --branch <rev> -d <destination>
+jj rebase --branch <rev> -o <destination>
 ```
 
 Move descendants from a source:
 
 ```sh
-jj rebase -s <source> -d <destination>
+jj rebase -s <source> -o <destination>
 ```
 
-Interactive rebase:
+`-o`/`--onto` replaces the deprecated `-d`/`--destination`.
+
+There is no `jj rebase --interactive`. To reorder or abandon revisions in a terminal UI, use the command below. It needs an interactive terminal.
 
 ```sh
-jj rebase --interactive
+jj arrange
 ```
 
 Common example:
 
 ```sh
 jj git fetch
-jj rebase --branch @ -d main
+jj rebase --branch @ -o main
 ```
 
 Rebase rewrites history. Ask before running it if approval is required.
@@ -354,7 +360,7 @@ Control sparse patterns with `--sparse-patterns copy|full|empty` (default `copy`
 - Move a commit made in one workspace onto another workspace's line with `jj rebase`:
 
 ```sh
-jj rebase -s <source> -d <destination>
+jj rebase -s <source> -o <destination>
 ```
 
 - Advance a workspace to a given revision (e.g. to "catch up" the default workspace after rebasing):
@@ -438,7 +444,7 @@ Push all eligible changes according to repo config:
 jj git push
 ```
 
-Push a specific bookmark:
+Push a specific bookmark. This also works for a new local bookmark; no separate track step is needed:
 
 ```sh
 jj git push -b <bookmark>
@@ -450,10 +456,16 @@ Push tracked bookmarks:
 jj git push --tracked
 ```
 
-Create a new bookmark on push:
+Create a bookmark named `push-<change-id>` for a revision and push it:
 
 ```sh
-jj git push -N
+jj git push -c <rev>
+```
+
+Create a bookmark with a chosen name for a revision and push it:
+
+```sh
+jj git push --named <bookmark>=<rev>
 ```
 
 Do not use `git push`. Pushing publishes history; ask first if approval is required.
