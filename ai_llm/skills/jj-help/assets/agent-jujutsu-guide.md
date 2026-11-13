@@ -445,11 +445,15 @@ Move/set a bookmark:
 jj bookmark set <name> -r @
 ```
 
-Move a bookmark only if it can advance:
+Move a bookmark forward to a target revision. It refuses to move a bookmark backwards or sideways:
 
 ```sh
-jj bookmark advance <name>
+jj bookmark advance <name> --to @-
 ```
+
+Without `--to`, the target is `@`.
+
+Point bookmarks at commits that contain the work. After `jj commit`, the work is in `@-` and `@` is a new empty commit with no description. `jj git push` refuses to push a commit with no description.
 
 Delete a bookmark:
 
@@ -598,10 +602,11 @@ jj git fetch
 jj log -r 'remote_bookmarks()..'
 ```
 
-Create branch-like bookmark and push:
+Commit, create a branch-like bookmark on that commit, and push:
 
 ```sh
-jj bookmark create <bookmark> -r @
+jj commit -m "message"
+jj bookmark create <bookmark> -r @-
 jj git push -b <bookmark>
 ```
 
