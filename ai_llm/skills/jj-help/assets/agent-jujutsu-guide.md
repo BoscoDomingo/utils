@@ -1,6 +1,6 @@
 # Jujutsu Quick Guide
 
-Use Jujutsu (`jj`) for version control when it is available, except when the current checkout is a plain Git worktree. A plain Git worktree is a linked Git worktree that jj does not manage. In a plain Git worktree, do not use `jj`; use basic Git commands instead.
+Use Jujutsu (`jj`) for version control when it is available.
 
 This guide is meant for agents that know Git better than Jujutsu. Use built-in `jj` commands, not local aliases.
 
@@ -9,8 +9,6 @@ Commands and behavior in this guide are verified against jj 0.47.1.
 ## Mental Model
 
 - `jj` can use a Git repository as storage, but it has its own commit model and commands.
-- Plain Git worktrees are an exception: if you are already inside one, stay in Git mode and do not run `jj`.
-- A colocated jj workspace can also be a linked Git worktree. jj manages it, so use `jj` there. See the Git Worktree Exception for how to tell them apart.
 - Detached HEAD is normal. Do not treat it as a problem by itself.
 - The working copy is a mutable commit named `@`.
 - The parent of the working-copy commit is `@-`.
@@ -22,7 +20,7 @@ Commands and behavior in this guide are verified against jj 0.47.1.
 
 ## Safety Rules
 
-- First determine whether the current directory is a plain Git worktree. If it is, do not use `jj`; use the Git Worktree Exception below.
+- First check whether the current directory is a Git worktree that jj did not create. If it is, follow the Git Worktree Exception below.
 - Prefer read-only inspection first: `jj status`, `jj diff`, `jj show`, `jj log`.
 - Do not run `git checkout -b`, `git switch -c`, `git pull`, or `git push` unless you are in the Git Worktree Exception.
 - Use `jj git fetch` instead of `git pull`.
@@ -34,7 +32,7 @@ Commands and behavior in this guide are verified against jj 0.47.1.
 
 ## Git Worktree Exception
 
-If the current checkout is a plain Git worktree (created with `git worktree add`, not by jj), DO NOT use `jj`. Treat it as a Git-owned workspace and use conservative/basic Git commands instead.
+In a Git worktree that jj did not create (for example, one made with `git worktree add`), DO NOT use `jj`. Use conservative/basic Git commands instead.
 
 Detect a linked Git worktree with read-only Git inspection:
 
@@ -50,20 +48,16 @@ If `--git-dir` and `--git-common-dir` differ, you are in a linked Git worktree. 
 git worktree list --porcelain
 ```
 
-Then check whether jj manages that worktree:
+A linked Git worktree with `.jj` at its root was created by `jj workspace add`, so use `jj` there:
 
 ```sh
-test -d "$(git rev-parse --show-toplevel)/.jj" && echo jj-workspace || echo plain-git-worktree
+test -d "$(git rev-parse --show-toplevel)/.jj" && echo jj || echo git
 ```
 
-- `.jj` exists at the worktree root: it is a colocated jj workspace, created by `jj workspace add`. Use `jj` normally and ignore the rest of this section.
-- `.jj` does not exist at the worktree root: it is a plain Git worktree. Use Git as described below.
+Do not use `jj workspace root` for this check; inside a nested Git worktree it reports the parent jj repo.
 
-Do not use `jj workspace root` for this check. In a plain Git worktree nested inside a jj repo directory, it finds the parent repo and reports its root.
+When using Git there:
 
-In a plain Git worktree:
-
-- Do not run `jj status`, `jj log`, `jj new`, `jj workspace`, `jj bookmark`, `jj git fetch`, or other `jj` commands.
 - Inspect with `git status --short --branch`, `git diff`, `git log --oneline --decorate -n 20`, and `git branch --show-current`.
 - Commit with normal Git staging and commit commands (`git add`, `git commit`) if approval policy allows.
 - Fetch with `git fetch`; avoid `git pull` unless the user explicitly asks and repo policy permits it.
@@ -320,7 +314,7 @@ Workspaces let you attach more than one working copy to the same repo. Each work
 
 ### Workspaces vs Git Worktrees
 
-Agents tend to know Git worktrees and wrongly map them onto jj workspaces. Key rule: if you are already inside a plain Git worktree, do not switch to jj; use basic Git commands for that checkout. Only use jj workspaces in repos that are already being managed with jj.
+Agents tend to know Git worktrees and wrongly map them onto jj workspaces. Only use jj workspaces in repos that are already being managed with jj.
 
 Key differences:
 
@@ -329,8 +323,7 @@ Key differences:
 - To combine work across Git worktrees you merge branches. With jj you just `jj rebase` or `jj new` commits across the shared tree; there is no separate "merge the worktree" step.
 - jj workspace conflicts are handled by jj's normal first-class conflicts (rebase records the conflict in the commit), not by a blocking merge step.
 - Practically they serve similar goals (parallel work, long-running builds/tests, agent sandboxes), but do not assume branch-bound worktree semantics.
-- In a colocated repo, `jj workspace add` also creates a linked Git worktree for the new workspace, with a detached HEAD. jj manages that worktree: use `jj` inside it, and remove it with `jj workspace remove`, not `git worktree remove`.
-- Compatibility rule: do not operate on a plain Git worktree with `jj`. Use Git in plain Git worktrees; use `jj workspace` only for jj-managed workspaces.
+- In a colocated repo, `jj workspace add` also creates a Git worktree for the workspace. Remove it with `jj workspace remove`, not `git worktree remove`.
 
 ### Inspect Workspaces
 
@@ -367,7 +360,7 @@ With no `-r`, the new workspace's working-copy commit shares the same parent(s) 
 
 Control sparse patterns with `--sparse-patterns copy|full|empty` (default `copy`, inherits the current workspace's patterns).
 
-Control the Git worktree with `--colocate` or `--no-colocate`. By default, jj creates a Git worktree when the current workspace is colocated and the `git.colocate` setting is `true` (its default). Use `--no-colocate` for a jj-only workspace with no `.git`.
+Use `--no-colocate` to skip creating the Git worktree in a colocated repo.
 
 ### Work Across Workspaces
 
@@ -394,15 +387,11 @@ Remove a workspace and delete its directory:
 jj workspace remove <name>
 ```
 
-`jj workspace remove` first snapshots the workspace's working copy into a commit. Then it deletes the workspace directory and any Git worktree that jj created for it. It also works on stale workspaces.
-
 Stop tracking a workspace but keep its directory on disk:
 
 ```sh
 jj workspace forget <name>
 ```
-
-`jj workspace forget` stops tracking the workspace's working-copy commit and removes any Git worktree that jj created for it. It does not delete the directory. Forgetting does not discard commits that are reachable elsewhere in the tree.
 
 ### Rename
 
@@ -420,7 +409,7 @@ jj workspace update-stale
 
 ### Safety Notes
 
-- Creating, removing, forgetting, renaming, and updating-stale workspaces change repo state; follow repo approval policy. `jj workspace remove` also deletes files on disk.
+- Creating, removing, forgetting, renaming, and updating-stale workspaces change repo state; follow repo approval policy.
 - `jj undo` and `jj redo` refuse to act on an operation that another workspace performed. Do not pass `--allow-cross-workspace` without user approval.
 - Confirm which workspace you are in (`jj workspace root`, `jj workspace list`) before mutating, since all workspaces share history and a rebase here affects what others see.
 - Prefer creating workspaces as siblings; warn the user before nesting a workspace inside the main repo.
@@ -439,13 +428,13 @@ Create a bookmark:
 jj bookmark create <name> -r @
 ```
 
-Move/set a bookmark:
+Move/set a bookmark (add `-B`/`--allow-backwards` to move it backwards or sideways):
 
 ```sh
 jj bookmark set <name> -r @
 ```
 
-Move a bookmark forward to a target revision. It refuses to move a bookmark backwards or sideways:
+Move a bookmark forward to a target revision:
 
 ```sh
 jj bookmark advance <name> --to @-
@@ -471,7 +460,7 @@ Push all eligible changes according to repo config:
 jj git push
 ```
 
-Push a specific bookmark. This also works for a new local bookmark; no separate track step is needed:
+Push a specific bookmark:
 
 ```sh
 jj git push -b <bookmark>
@@ -620,8 +609,6 @@ cd ../feature-x
 jj workspace remove feature-x
 ```
 
-If you are already in a plain Git worktree, do not run this workflow; stay with basic Git commands.
-
 ## Git Command Translation
 
 | Git habit                  | Jujutsu command                                      |
@@ -640,9 +627,9 @@ If you are already in a plain Git worktree, do not run this workflow; stay with 
 | `git push`                 | `jj git push`                                        |
 | `git rebase`               | `jj rebase`                                          |
 | `git merge main`           | `jj new main @`                                      |
-| `git worktree add <path>`  | `jj workspace add <path>` only in jj-managed repos; if already in a plain Git worktree, stay with Git |
-| `git worktree list`        | `jj workspace list` for jj workspaces; `git worktree list` for plain Git worktrees |
-| `git worktree remove`      | `jj workspace remove <name>` for jj workspaces; use Git for plain Git worktrees |
+| `git worktree add <path>`  | `jj workspace add <path>`                            |
+| `git worktree list`        | `jj workspace list`                                  |
+| `git worktree remove`      | `jj workspace remove <name>`                         |
 
 ## Final Reminders
 
@@ -651,4 +638,3 @@ If you are already in a plain Git worktree, do not run this workflow; stay with 
 - Never rely on aliases from someone else's config.
 - Avoid Git branch/staging mental models; use working-copy commits, bookmarks, filesets, split, and squash.
 - Do not map Git worktrees onto jj workspaces; jj workspaces are not branch-bound and share the full revision tree.
-- If already inside a plain Git worktree (no `.jj` at its root), do not use `jj`; use basic Git commands instead.
