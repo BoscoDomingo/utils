@@ -4,7 +4,6 @@ description: >
   Force agent to use ASD-STE100 style for rewriting or producing clear user-facing
   output. Never apply it to internal reasoning, tool calls, code, or quoted
   content.
-disable-model-invocation: true
 ---
 
 # ASD-STE100 Simplified Technical English
