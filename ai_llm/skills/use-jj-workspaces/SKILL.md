@@ -18,6 +18,10 @@ Use `jj workspace`; do not rely on local aliases such as `jj w`.
 - Protect the source workspace: no `jj new`, edit, reset, restore, fetch,
   rebase, abandon, or bookmark movement as setup or cleanup. The only allowed
   source change is an approved commit of current work (step 2).
+- Both `jj commit` and `jj workspace add` snapshot the source working copy and
+  can auto-recover a stale one. Always pass
+  `--config snapshot.auto-update-stale=false` to them. If the source is stale,
+  stop and ask; recovery needs its own approval.
 
 ## Workflow
 
@@ -27,7 +31,8 @@ Use `jj workspace`; do not rely on local aliases such as `jj w`.
 2. Use the requested base; if unspecified, ask whether to include current work
    or use a named revision. Never base on the source's live `@`: it is rewritten
    as the source keeps changing, leaving the new workspace stale. To include
-   current work, ask approval to commit it (`jj commit -m "<message>"`) and use
+   current work, ask approval to commit it
+   (`jj --config snapshot.auto-update-stale=false commit -m "<message>"`) and use
    the resulting `@-`. Pin exactly one full commit ID as BASE with
    `jj --at-op=@ log --no-graph -r '<revision>' -T 'commit_id ++ "\n"'`.
 3. Default to fresh, even if an existing workspace looks reusable. Choose the
@@ -41,7 +46,7 @@ Use `jj workspace`; do not rely on local aliases such as `jj w`.
    confirm the changed proposal. Do not overwrite paths.
 
    ```sh
-   jj workspace add --name "copy-N" -r "<BASE>" "<absolute-sibling-path>"
+   jj --config snapshot.auto-update-stale=false workspace add --name "copy-N" -r "<BASE>" "<absolute-sibling-path>"
    ```
 
    Explicit `-r` avoids the default of sharing the source `@`'s parents. Respect
