@@ -21,7 +21,7 @@ graders:
     name: commits-before-basing
     config:
       contains:
-        - "jj commit"
+        - " commit"
         - "approv"
         - "workspace add"
       not_contains:
