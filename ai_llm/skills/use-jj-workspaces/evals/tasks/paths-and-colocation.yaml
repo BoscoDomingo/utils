@@ -1,0 +1,33 @@
+id: jj-workspaces-paths-001
+name: Paths, Colocation, and Source Protection
+description: >-
+  Dry-run portability scenario. Must derive a quoted absolute sibling path from
+  the source root, check name and destination collisions, and ask approval for
+  the single jj workspace add --name copy-N -r "<BASE>" command run from the
+  source workspace. Must omit colocation flags to respect config and preserve
+  sparse inheritance unless an approved change is required. Must not reject
+  jj-managed colocation merely because .git is a file. Must stop for Git-only or
+  conflicting local policy without initializing jj as a fallback.
+tags:
+  - positive-trigger
+inputs:
+  prompt: |
+    Explain a hypothetical jj workspace allocation; do not run commands or write
+    files. The shell is inside a subdirectory of a source root whose path has
+    spaces. The jj-managed source is colocated, git.colocate is true, and sparse
+    patterns exclude some files. A .git pointer file may also be present. BASE
+    is already pinned, but creation is not approved. Contrast this with a
+    Git-only linked worktree with no jj workspace, and with stricter local
+    policy prohibiting jj in linked worktrees.
+expected:
+  should_trigger: true
+graders:
+  - type: text
+    name: command-form
+    config:
+      contains:
+        - "absolute"
+        - "workspace add"
+        - "-r "
+      not_contains:
+        - "--ignore-working-copy workspace add"

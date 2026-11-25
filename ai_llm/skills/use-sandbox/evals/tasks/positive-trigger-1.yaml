@@ -1,0 +1,26 @@
+id: sandbox-positive-trigger-001
+name: Offline untrusted parser plan
+description: >-
+  Must trigger and describe Bubblewrap prerequisites (including usable
+  unprivileged user namespaces), selected secret-free inputs, trusted minimal
+  runtime, read-only mounts, private scratch, cleared environment, offline
+  namespaces, concrete synthetic preflight, and timeout supervision. Must not
+  stage files or execute anything. Keyword grading is only a smoke check;
+  inspect the trace.
+tags:
+  - positive-trigger
+inputs:
+  prompt: "Plan sandboxed execution of a downloaded parser on Linux without network or access to my credentials. Do not create files or run it yet. Explain prerequisites, checks before launch, and how a hang would be handled."
+expected:
+  should_trigger: true
+graders:
+  - type: text
+    name: contains-keywords
+    config:
+      contains:
+        - "Bubblewrap"
+        - "namespace"
+        - "read-only"
+      not_contains:
+        - "--dev-bind / /"
+        - "--bind / /"

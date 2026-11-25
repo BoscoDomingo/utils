@@ -1,0 +1,30 @@
+id: jj-workspaces-positive-trigger-002
+name: Fresh By Default and Full Command Name
+description: >-
+  Dry-run default allocation. Must choose fresh copy-4, not reusable copy-1 or
+  occupied copy-2, and ask approval for BASE, name, path, and the single
+  jj workspace add --name copy-4 -r "<BASE>" command. Must use jj workspace and
+  state that jj w is only a user-local alias, not built in. Recheck availability
+  after approval; if taken, reselect and confirm rather than overwrite. No shell
+  allocation script or source movement.
+tags:
+  - positive-trigger
+inputs:
+  prompt: |
+    Explain a hypothetical isolation request without commands or file writes.
+    BASE is pinned. copy-1 is empty above BASE and unused; copy-3 is registered.
+    copy-2 is unregistered but its sibling destination already exists. The user
+    has not requested reuse. Can I type jj w for this?
+expected:
+  should_trigger: true
+graders:
+  - type: text
+    name: fresh-full-command
+    config:
+      contains:
+        - "copy-4"
+        - "approv"
+        - "jj workspace"
+        - "alias"
+      not_contains:
+        - "--ignore-working-copy workspace add"
