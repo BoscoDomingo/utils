@@ -32,7 +32,7 @@ Use `jj workspace`; do not rely on local aliases such as `jj w`.
    or use a named revision. Never base on the source's live `@`: it is rewritten
    as the source keeps changing, leaving the new workspace stale. To include
    current work, ask approval to commit it
-   (`jj --config snapshot.auto-update-stale=false commit -m "<message>"`) and use
+   (`jj commit --config snapshot.auto-update-stale=false -m "<message>"`) and use
    the resulting `@-`. Pin exactly one full commit ID as BASE with
    `jj --at-op=@ log --no-graph -r '<revision>' -T 'commit_id ++ "\n"'`.
 3. Default to fresh, even if an existing workspace looks reusable. Choose the
@@ -46,7 +46,7 @@ Use `jj workspace`; do not rely on local aliases such as `jj w`.
    confirm the changed proposal. Do not overwrite paths.
 
    ```sh
-   jj --config snapshot.auto-update-stale=false workspace add --name "copy-N" -r "<BASE>" "<absolute-sibling-path>"
+   jj workspace add --config snapshot.auto-update-stale=false --name "copy-N" -r "<BASE>" "<absolute-sibling-path>"
    ```
 
    Explicit `-r` avoids the default of sharing the source `@`'s parents. Respect
